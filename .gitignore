@@ -40,3 +40,6 @@ application.yaml
 
 ### VS Code ###
 .vscode/
+
+# DB 초기화용 클래스 무시
+/src/main/java/com/erp/erp_accounting/data/AccountDataInitializer.java
