@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.employee.entity;
 
+import com.erp.erp_accounting.global.entity.BaseEntity;
 import com.erp.erp_accounting.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +10,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Employee {
+public class Employee extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
