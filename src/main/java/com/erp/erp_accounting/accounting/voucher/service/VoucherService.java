@@ -4,6 +4,7 @@ import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateRequest;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherLineRequest;
+import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherLine;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherStatus;
@@ -13,6 +14,8 @@ import com.erp.erp_accounting.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +62,21 @@ public class VoucherService {
     private void validateLines(VoucherCreateRequest request) {
         if (request.getLines() == null || request.getLines().isEmpty()) {
             throw new IllegalArgumentException("전표 라인은 최소 1개 이상 필요합니다.");
+        }
+
+        // 대차검증
+        BigDecimal debitSum = request.getLines().stream()
+                .filter(line -> line.getType() == LineType.DEBIT)
+                .map(VoucherLineRequest::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal creditSum = request.getLines().stream()
+                .filter(line -> line.getType() == LineType.CREDIT)
+                .map(VoucherLineRequest::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (debitSum.compareTo(creditSum) != 0) {
+            throw new IllegalArgumentException("차변과 대변의 합계 불일치");
         }
     }
 
