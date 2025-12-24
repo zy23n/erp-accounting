@@ -1,0 +1,59 @@
+package com.erp.erp_accounting.accounting.voucher.service;
+
+import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherLineResponse;
+import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListResponse;
+import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
+import com.erp.erp_accounting.accounting.voucher.entity.LineType;
+import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
+import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class VoucherQueryService {
+
+    private final VoucherRepository voucherRepository;
+
+    // 단건 조회
+    public VoucherResponse getVoucher(Long voucherId) {
+
+        Voucher voucher = voucherRepository.findWithLinesById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("전표 없음"));
+
+        return toResponse(voucher);
+    }
+
+    // 목록 조회
+    public List<VoucherListResponse> getVoucherList() {
+        return voucherRepository.findVoucherList(LineType.DEBIT, LineType.CREDIT);
+    }
+
+    // DTO 변환
+    private VoucherResponse toResponse(Voucher voucher) {
+
+        List<VoucherLineResponse> lines = voucher.getLines().stream()
+                .map(line -> new VoucherLineResponse(
+                        line.getId(),
+                        line.getAccount().getId(),
+                        line.getAccount().getName(),
+                        line.getType().name(),
+                        line.getAmount()
+                ))
+                .toList();
+
+        return new VoucherResponse(
+                voucher.getId(),
+                voucher.getVoucherNo(),
+                voucher.getVoucherDate(),
+                voucher.getDescription(),
+                voucher.getStatus(),
+                voucher.getCreatedBy().getId(),
+                lines
+        );
+    }
+}
