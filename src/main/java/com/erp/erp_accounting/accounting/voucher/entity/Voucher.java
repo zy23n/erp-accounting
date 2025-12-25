@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,12 @@ public class Voucher extends BaseEntity {
     @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VoucherLine> lines = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
+
+    private LocalDateTime approvedAt;
+
     @Builder
     public Voucher(String voucherNo, LocalDate voucherDate, User createdBy, VoucherStatus status, String description) {
         this.voucherNo = voucherNo;
@@ -61,11 +68,21 @@ public class Voucher extends BaseEntity {
     }
 
     // 상태 변경 헬퍼 메서드
-    public void approve() {
+    public void approve(User approver) {
+        if (this.status != VoucherStatus.DRAFT) {
+            throw new IllegalStateException("DRAFT 상태의 전표만 승인할 수 있습니다.");
+        }
         this.status = VoucherStatus.APPROVED;
+        this.approvedBy = approver;
+        this.approvedAt = LocalDateTime.now();
     }
 
-    public void reject() {
+    public void reject(User approver) {
+        if (this.status != VoucherStatus.DRAFT) {
+            throw new IllegalStateException("DRAFT 상태의 전표만 반려할 수 있습니다.");
+        }
         this.status = VoucherStatus.REJECTED;
+        this.approvedBy = approver;
+        this.approvedAt = LocalDateTime.now();
     }
 }
