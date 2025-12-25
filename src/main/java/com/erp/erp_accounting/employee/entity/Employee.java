@@ -29,11 +29,19 @@ public class Employee extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
+    private String position;
+
+    @Column(nullable = false)
+    private String department;
+
     @Builder
-    public Employee(String empNo, String name, LocalDate hireDate, User user) {
+    public Employee(String empNo, String name, LocalDate hireDate, User user, String position, String department) {
         this.empNo = empNo;
         this.name = name;
         this.hireDate = hireDate;
         this.user = user;
+        this.position = position;
+        this.department = department;
     }
 }

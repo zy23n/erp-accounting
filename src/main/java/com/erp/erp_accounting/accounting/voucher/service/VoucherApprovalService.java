@@ -51,7 +51,10 @@ public class VoucherApprovalService {
                 voucher.getStatus().name(),
                 voucher.getApprovedBy().getId(),
                 voucher.getApprovedBy().getUsername(),
-                voucher.getApprovedAt()
+                voucher.getApprovedAt(),
+                voucher.getVoucherType(),
+                voucher.getSourceType(),
+                voucher.getSourceId()
         );
     }
 }

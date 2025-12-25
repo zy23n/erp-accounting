@@ -28,6 +28,17 @@ public class Voucher extends BaseEntity {
     private LocalDate voucherDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "voucher_type", nullable = false)
+    private VoucherType voucherType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source_type", nullable = false)
+    private SourceType sourceType;
+
+    @Column(name = "source_id")
+    private Long sourceId;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VoucherStatus status;
 
@@ -45,15 +56,20 @@ public class Voucher extends BaseEntity {
     @JoinColumn(name = "approved_by")
     private User approvedBy;
 
+    @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
     @Builder
-    public Voucher(String voucherNo, LocalDate voucherDate, User createdBy, VoucherStatus status, String description) {
+    public Voucher(String voucherNo, LocalDate voucherDate, User createdBy, VoucherStatus status, String description,
+                   VoucherType voucherType, SourceType sourceType, Long sourceId) {
         this.voucherNo = voucherNo;
         this.voucherDate = voucherDate;
         this.createdBy = createdBy;
         this.status = status;
         this.description = description;
+        this.voucherType = voucherType;
+        this.sourceType = sourceType;
+        this.sourceId = sourceId;
     }
 
     // 양방향 연관관계 헬퍼 메서드

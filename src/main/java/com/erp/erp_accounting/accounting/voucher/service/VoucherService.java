@@ -4,10 +4,7 @@ import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateRequest;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherLineRequest;
-import com.erp.erp_accounting.accounting.voucher.entity.LineType;
-import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
-import com.erp.erp_accounting.accounting.voucher.entity.VoucherLine;
-import com.erp.erp_accounting.accounting.voucher.entity.VoucherStatus;
+import com.erp.erp_accounting.accounting.voucher.entity.*;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.user.entity.User;
 import com.erp.erp_accounting.user.repository.UserRepository;
@@ -34,6 +31,10 @@ public class VoucherService {
         // 전표 라인 검증
         validateLines(request);
 
+        // voucherType, sourceType 자동 세팅
+        VoucherType voucherType = request.getSourceId() != null ? VoucherType.PAYROLL : VoucherType.GENERAL;
+        SourceType sourceType = request.getSourceId() != null ? SourceType.PAYROLL : SourceType.NONE;
+
         // 전표 생성
         Voucher voucher = Voucher.builder()
                 .voucherNo(generateVoucherNo())
@@ -41,6 +42,9 @@ public class VoucherService {
                 .description(request.getDescription())
                 .status(VoucherStatus.DRAFT)
                 .createdBy(user)
+                .voucherType(voucherType)
+                .sourceType(sourceType)
+                .sourceId(request.getSourceId())
                 .build();
 
         // 전표 라인 생성

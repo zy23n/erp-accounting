@@ -53,7 +53,10 @@ public class VoucherQueryService {
                 voucher.getDescription(),
                 voucher.getStatus(),
                 voucher.getCreatedBy().getId(),
-                lines
+                lines,
+                voucher.getVoucherType(),
+                voucher.getSourceType(),
+                voucher.getSourceId()
         );
     }
 }

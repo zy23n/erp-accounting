@@ -15,4 +15,6 @@ public class VoucherCreateRequest {
     private LocalDate voucherDate;
     private String description;
     private List<VoucherLineRequest> lines;
+
+    private Long sourceId;
 }
