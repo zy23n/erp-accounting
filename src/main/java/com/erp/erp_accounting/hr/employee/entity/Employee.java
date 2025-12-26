@@ -1,4 +1,4 @@
-package com.erp.erp_accounting.employee.entity;
+package com.erp.erp_accounting.hr.employee.entity;
 
 import com.erp.erp_accounting.global.entity.BaseEntity;
 import com.erp.erp_accounting.user.entity.User;
