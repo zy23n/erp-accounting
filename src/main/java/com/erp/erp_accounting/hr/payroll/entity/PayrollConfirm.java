@@ -35,38 +35,73 @@ public class PayrollConfirm extends BaseEntity {
     @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;
 
-    @OneToMany(mappedBy = "payrollConfirm", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "payrollConfirm", cascade = CascadeType.ALL)
     private List<Payroll> payrolls = new ArrayList<>();
 
-    // 편의 메서드 : Payroll 추가
     public void addPayroll(Payroll payroll) {
+        if (this.status == PayrollConfirmStatus.CONFIRMED) {
+            throw new IllegalStateException("확정된 급여에는 급여 추가 불가");
+        }
+
+        if (payroll.getPayrollConfirm() != null) {
+            throw new IllegalStateException("이미 다른 급여 확정에 포함된 급여는 추가 불가");
+        }
+
+        if (!this.payMonth.equals(payroll.getPayMonth())) {
+            throw new IllegalStateException("급여 월이 급여 확정 월과 불일치");
+        }
+
+        if (payroll.getStatus() != PayrollStatus.CALCULATED) {
+            throw new IllegalStateException("CALCULATED 상태의 급여만 확정 가능");
+        }
+
         payrolls.add(payroll);
         payroll.setPayrollConfirm(this);
     }
 
-    // 편의 메서드 : Payroll 제거
     public void removePayroll(Payroll payroll) {
         payrolls.remove(payroll);
         payroll.setPayrollConfirm(null);
     }
 
-    // 상태 변경 : 확정
+    // 재확정을 위한 초기화
+    public void clearPayrolls() {
+        payrolls.forEach(p -> p.setPayrollConfirm(null));
+        payrolls.clear();
+    }
+
+    // 확정 (최초 확정 + 재확정 공용)
     public void confirm(User user) {
+        if (this.status == PayrollConfirmStatus.CONFIRMED) {
+            throw new IllegalStateException("이미 확정된 급여확정");
+        }
+
         this.status = PayrollConfirmStatus.CONFIRMED;
         this.confirmedBy = user;
         this.confirmedAt = LocalDateTime.now();
+
+        this.payrolls.forEach(Payroll::markConfirmed);
     }
 
-    // 상태 변경 : 취소
+    // 확정 취소
     public void cancel() {
+        if (this.status != PayrollConfirmStatus.CONFIRMED) {
+            throw new IllegalStateException("확정된 급여만 취소 가능");
+        }
+
         this.status = PayrollConfirmStatus.CANCELED;
         this.confirmedBy = null;
         this.confirmedAt = null;
+
+        this.payrolls.forEach(p -> {
+            p.rollbackToCalculated();
+            p.setPayrollConfirm(null);
+        });
     }
 
     @Builder
-    public PayrollConfirm(YearMonth payMonth, PayrollConfirmStatus status) {
+    public PayrollConfirm(YearMonth payMonth) {
         this.payMonth = payMonth;
-        this.status = status;
+        this.status = PayrollConfirmStatus.CREATED;
     }
 }

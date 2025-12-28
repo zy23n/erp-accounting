@@ -10,6 +10,14 @@ import lombok.NoArgsConstructor;
 import java.time.YearMonth;
 import java.math.BigDecimal;
 
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_payroll_employee_month",
+                        columnNames = {"employee_id", "pay_month"}
+                )
+        }
+)
 @Entity
 @Getter
 @NoArgsConstructor
@@ -46,7 +54,7 @@ public class Payroll extends BaseEntity {
     @JoinColumn(name = "payroll_confirm_id")
     private PayrollConfirm payrollConfirm;
 
-    // 편의 메서드 : 헤더 연결
+    // 헤더 연결
     public void setPayrollConfirm(PayrollConfirm payrollConfirm) {
         this.payrollConfirm = payrollConfirm;
     }
@@ -57,19 +65,33 @@ public class Payroll extends BaseEntity {
             throw new IllegalStateException("급여, 수당, 공제 금액이 모두 있어야 계산 가능");
         }
         this.netAmount = baseSalary.add(allowanceAmount).subtract(deductionAmount);
+        this.status = PayrollStatus.CALCULATED;
+    }
+
+    public void markConfirmed() {
+        if (this.status != PayrollStatus.CALCULATED) {
+            throw new IllegalStateException("CALCULATED 상태의 급여만 확정 가능");
+        }
+
+        this.status = PayrollStatus.CONFIRMED;
+    }
+
+    public void rollbackToCalculated() {
+        if (this.status != PayrollStatus.CONFIRMED) {
+            throw new IllegalStateException("CONFIRMED 상태만 CALCULATED로 롤백 가능");
+        }
+
+        this.status = PayrollStatus.CALCULATED;
     }
 
     @Builder
     public Payroll(Employee employee, YearMonth payMonth, BigDecimal baseSalary,
-                   BigDecimal allowanceAmount, BigDecimal deductionAmount, BigDecimal netAmount,
-                   PayrollStatus status, PayrollConfirm payrollConfirm) {
+                   BigDecimal allowanceAmount, BigDecimal deductionAmount) {
         this.employee = employee;
         this.payMonth = payMonth;
         this.baseSalary = baseSalary;
         this.allowanceAmount = allowanceAmount;
         this.deductionAmount = deductionAmount;
-        this.netAmount = netAmount;
-        this.status = status;
-        this.payrollConfirm = payrollConfirm;
+        this.status = PayrollStatus.CREATED;
     }
 }
