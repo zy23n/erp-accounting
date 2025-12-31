@@ -19,5 +19,9 @@ public class PayrollConfirmResponse {
     private String confirmedByUsername;
     private LocalDateTime confirmedAt;
 
+    private Long canceledById;
+    private String canceledByUsername;
+    private LocalDateTime canceledAt;
+
     private List<PayrollResponse> payrolls;
 }

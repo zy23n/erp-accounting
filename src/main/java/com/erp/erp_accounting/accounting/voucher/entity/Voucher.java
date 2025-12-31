@@ -59,6 +59,13 @@ public class Voucher extends BaseEntity {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "canceled_by")
+    private User canceledBy;
+
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
     @Builder
     public Voucher(String voucherNo, LocalDate voucherDate, User createdBy, VoucherStatus status, String description,
                    VoucherType voucherType, SourceType sourceType, Long sourceId) {
@@ -84,21 +91,37 @@ public class Voucher extends BaseEntity {
     }
 
     // 상태 변경 헬퍼 메서드
-    public void approve(User approver) {
+    private void assertDraft() {
         if (this.status != VoucherStatus.DRAFT) {
-            throw new IllegalStateException("DRAFT 상태의 전표만 승인할 수 있습니다.");
+            throw new IllegalStateException("DRAFT 상태의 전표만 처리 가능");
         }
+    }
+
+    public void approve(User approver) {
+        assertDraft();
         this.status = VoucherStatus.APPROVED;
         this.approvedBy = approver;
         this.approvedAt = LocalDateTime.now();
     }
 
     public void reject(User approver) {
-        if (this.status != VoucherStatus.DRAFT) {
-            throw new IllegalStateException("DRAFT 상태의 전표만 반려할 수 있습니다.");
-        }
+        assertDraft();
         this.status = VoucherStatus.REJECTED;
         this.approvedBy = approver;
         this.approvedAt = LocalDateTime.now();
+    }
+
+    public boolean isCancelable() {
+        return this.status == VoucherStatus.APPROVED;
+    }
+
+    public void cancel(User user) {
+        if (!isCancelable()) {
+            throw new IllegalStateException("승인된 전표만 취소 가능");
+        }
+
+        this.status = VoucherStatus.CANCELED;
+        this.canceledBy = user;
+        this.canceledAt = LocalDateTime.now();
     }
 }

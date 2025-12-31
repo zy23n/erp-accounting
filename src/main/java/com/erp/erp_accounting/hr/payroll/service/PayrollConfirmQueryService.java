@@ -6,6 +6,7 @@ import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollConfirmRepository;
+import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +33,12 @@ public class PayrollConfirmQueryService {
                 confirm.getId(),
                 confirm.getPayMonth(),
                 confirm.getStatus(),
-                confirm.getConfirmedBy() != null ? confirm.getConfirmedBy().getId() : null,
-                confirm.getConfirmedBy() != null ? confirm.getConfirmedBy().getUsername() : null,
+                userId(confirm.getConfirmedBy()),
+                username(confirm.getConfirmedBy()),
                 confirm.getConfirmedAt(),
+                userId(confirm.getCanceledBy()),
+                username(confirm.getCanceledBy()),
+                confirm.getCanceledAt(),
                 payrolls
         );
     }
@@ -69,5 +73,13 @@ public class PayrollConfirmQueryService {
                 confirm.getConfirmedBy() != null ? confirm.getConfirmedBy().getUsername() : null,
                 confirm.getConfirmedAt()
         );
+    }
+
+    private Long userId(User user) {
+        return user != null ? user.getId() : null;
+    }
+
+    private String username(User user) {
+        return user != null ? user.getUsername() : null;
     }
 }

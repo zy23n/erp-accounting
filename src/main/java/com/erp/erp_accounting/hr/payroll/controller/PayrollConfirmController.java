@@ -33,8 +33,11 @@ public class PayrollConfirmController {
 
     // 급여 확정 취소
     @PostMapping("/{payrollConfirmId}/cancel")
-    public ResponseEntity<Void> cancel(@PathVariable("payrollConfirmId") Long payrollConfirmId) {
-        payrollConfirmService.cancel(payrollConfirmId);
+    public ResponseEntity<Void> cancel(
+            @PathVariable("payrollConfirmId") Long payrollConfirmId,
+            @RequestParam("userId") Long userId // 추후 로그인/권한 적용
+    ) {
+        payrollConfirmService.cancel(payrollConfirmId, userId);
         return ResponseEntity.ok().build();
     }
 }

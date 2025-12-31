@@ -6,6 +6,7 @@ import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,11 +53,26 @@ public class VoucherQueryService {
                 voucher.getVoucherDate(),
                 voucher.getDescription(),
                 voucher.getStatus(),
-                voucher.getCreatedBy().getId(),
+                userId(voucher.getCreatedBy()),
+                username(voucher.getCreatedBy()),
                 lines,
                 voucher.getVoucherType(),
                 voucher.getSourceType(),
-                voucher.getSourceId()
+                voucher.getSourceId(),
+                userId(voucher.getApprovedBy()),
+                username(voucher.getApprovedBy()),
+                voucher.getApprovedAt(),
+                userId(voucher.getCanceledBy()),
+                username(voucher.getCanceledBy()),
+                voucher.getCanceledAt()
         );
+    }
+
+    private Long userId(User user) {
+        return user != null ? user.getId() : null;
+    }
+
+    private String username(User user) {
+        return user != null ? user.getUsername() : null;
     }
 }

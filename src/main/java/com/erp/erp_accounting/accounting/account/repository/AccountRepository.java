@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
@@ -16,4 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     // leaf 계정만 조회 (전표 입력 가능 계정)
     @Query("select a from Account a where a.leaf = true order by a.code")
     List<Account> findLeafAccounts();
+
+    // 계정 코드로 조회 (자동분개용)
+    Optional<Account> findByCode(String code);
 }

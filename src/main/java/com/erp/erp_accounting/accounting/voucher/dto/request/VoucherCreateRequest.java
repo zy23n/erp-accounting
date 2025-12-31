@@ -1,6 +1,5 @@
 package com.erp.erp_accounting.accounting.voucher.dto.request;
 
-import com.erp.erp_accounting.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

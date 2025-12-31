@@ -38,6 +38,13 @@ public class PayrollConfirm extends BaseEntity {
     @OneToMany(mappedBy = "payrollConfirm", cascade = CascadeType.ALL)
     private List<Payroll> payrolls = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "canceled_by")
+    private User canceledBy;
+
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
     public void addPayroll(Payroll payroll) {
         if (this.status == PayrollConfirmStatus.CONFIRMED) {
             throw new IllegalStateException("확정된 급여에는 급여 추가 불가");
@@ -84,19 +91,17 @@ public class PayrollConfirm extends BaseEntity {
     }
 
     // 확정 취소
-    public void cancel() {
+    public void cancel(User user) {
         if (this.status != PayrollConfirmStatus.CONFIRMED) {
             throw new IllegalStateException("확정된 급여만 취소 가능");
         }
 
         this.status = PayrollConfirmStatus.CANCELED;
-        this.confirmedBy = null;
-        this.confirmedAt = null;
+        this.canceledBy = user;
+        this.canceledAt = LocalDateTime.now();
 
-        this.payrolls.forEach(p -> {
-            p.rollbackToCalculated();
-            p.setPayrollConfirm(null);
-        });
+        this.payrolls.forEach(Payroll::rollbackToCalculated);
+        this.clearPayrolls();
     }
 
     @Builder

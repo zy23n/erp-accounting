@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +24,7 @@ public class VoucherService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
 
-    public Long createVoucher(VoucherCreateRequest request, Long userId) {
-
+    public Voucher createVoucher(VoucherCreateRequest request, Long userId) {
         // 사용자 조회
         User user = findUser(userId);
 
@@ -55,7 +55,25 @@ public class VoucherService {
 
         // 저장
         voucherRepository.save(voucher);
+
+        return voucher;
+    }
+
+    public Long createAndAutoApprove(VoucherCreateRequest request, Long userId) {
+        Voucher voucher = createVoucher(request, userId);
+        voucher.approve(voucher.getCreatedBy());
         return voucher.getId();
+    }
+
+    public void cancelAutoVouchers(SourceType sourceType, Long sourceId, User user) {
+        List<Voucher> vouchers =
+                voucherRepository.findBySourceTypeAndSourceId(sourceType, sourceId);
+
+        for (Voucher voucher : vouchers) {
+            if (voucher.isCancelable()) {
+                voucher.cancel(user);
+            }
+        }
     }
 
     private User findUser(Long userId) {
@@ -105,5 +123,10 @@ public class VoucherService {
 
     private String generateVoucherNo() {
         return "V" + System.currentTimeMillis();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsBySource(SourceType sourceType, Long sourceId) {
+        return voucherRepository.existsBySourceTypeAndSourceId(sourceType, sourceId);
     }
 }

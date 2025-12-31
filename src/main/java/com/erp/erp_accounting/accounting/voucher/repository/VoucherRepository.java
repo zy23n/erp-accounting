@@ -2,7 +2,9 @@ package com.erp.erp_accounting.accounting.voucher.repository;
 
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListResponse;
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
+import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
+import com.erp.erp_accounting.accounting.voucher.entity.VoucherStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -46,4 +48,10 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
         @Param("debit") LineType debit,
         @Param("credit") LineType credit
     );
+
+    boolean existsBySourceTypeAndSourceId(SourceType sourceType, Long sourceId);
+
+    List<Voucher> findBySourceTypeAndSourceId(SourceType sourceType, Long sourceId);
+
+    boolean existsBySourceTypeAndSourceIdAndStatusNot(SourceType sourceType, Long sourceId, VoucherStatus status);
 }
