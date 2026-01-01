@@ -38,6 +38,14 @@ public class Account extends BaseEntity {
     @Column(nullable = false)
     private boolean leaf = true; // 전표 입력 가능 여부
 
+    // 정상 잔액 방향
+    public NormalBalance getNormalBalance() {
+        return switch (category) {
+            case ASSET, EXPENSE -> NormalBalance.DEBIT;
+            case LIABILITY, EQUITY, REVENUE -> NormalBalance.CREDIT;
+        };
+    }
+
     @Builder
     public Account(String code, String name, AccountCategory category, Account parent) {
         this.code = code;

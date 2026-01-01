@@ -1,5 +1,8 @@
 package com.erp.erp_accounting.accounting.account.entity;
 
+import lombok.Getter;
+
+@Getter
 public enum AccountCategory {
     ASSET("자산"),
     LIABILITY("부채"),
@@ -13,7 +16,4 @@ public enum AccountCategory {
         this.koreanName = koreanName;
     }
 
-    public String getKoreanName() {
-        return koreanName;
-    }
 }
