@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -97,8 +98,34 @@ public class Voucher extends BaseEntity {
         }
     }
 
+    public void validateBalanced() {
+        BigDecimal debitSum = BigDecimal.ZERO;
+        BigDecimal creditSum = BigDecimal.ZERO;
+
+        if (lines.isEmpty()) {
+            throw new IllegalStateException("전표 라인 없음");
+        }
+
+        for (VoucherLine line : lines) {
+            BigDecimal amount = line.getAmount();
+
+            if (line.getType() == LineType.DEBIT) {
+                debitSum = debitSum.add(amount);
+            } else if (line.getType() == LineType.CREDIT) {
+                creditSum = creditSum.add(amount);
+            }
+        }
+
+        if (debitSum.compareTo(creditSum) != 0) {
+            throw new IllegalStateException(
+                    String.format("대차 불일치 (차변=%s, 대변=%s)", debitSum, creditSum)
+            );
+        }
+    }
+
     public void approve(User approver) {
         assertDraft();
+        validateBalanced();
         this.status = VoucherStatus.APPROVED;
         this.approvedBy = approver;
         this.approvedAt = LocalDateTime.now();
