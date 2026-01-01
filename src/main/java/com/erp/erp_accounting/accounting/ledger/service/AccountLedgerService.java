@@ -3,12 +3,13 @@ package com.erp.erp_accounting.accounting.ledger.service;
 import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.entity.NormalBalance;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
-import com.erp.erp_accounting.accounting.ledger.dto.AccountLedgerQueryDto;
-import com.erp.erp_accounting.accounting.ledger.dto.OpeningBalanceDto;
+import com.erp.erp_accounting.accounting.ledger.dto.query.AccountLedgerQueryDto;
+import com.erp.erp_accounting.accounting.ledger.dto.query.OpeningBalanceDto;
 import com.erp.erp_accounting.accounting.ledger.dto.request.AccountLedgerRequest;
-import com.erp.erp_accounting.accounting.ledger.dto.AccountLedgerItemDto;
+import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerItemDto;
 import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerResponse;
-import com.erp.erp_accounting.accounting.voucher.repository.VoucherLineRepository;
+import com.erp.erp_accounting.accounting.ledger.repository.VoucherLineRepository;
+import com.erp.erp_accounting.global.util.BalanceCalculator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,8 +47,8 @@ public class AccountLedgerService {
                 request.getStartDate()
         );
 
-        BigDecimal openingBalance =
-                applyNormalBalance(normalBalance, BigDecimal.ZERO, ob.getDebitSum(), ob.getCreditSum());
+        BigDecimal openingBalance = BalanceCalculator.applyNormalBalance(
+                normalBalance, BigDecimal.ZERO, ob.getDebitSum(), ob.getCreditSum());
 
         // 기간 내 원장 조회
         List<AccountLedgerQueryDto> queryDtos =
@@ -76,7 +77,7 @@ public class AccountLedgerService {
             BigDecimal debit = dto.getDebitAmount() != null ? dto.getDebitAmount() : BigDecimal.ZERO;
             BigDecimal credit = dto.getCreditAmount() != null ? dto.getCreditAmount() : BigDecimal.ZERO;
 
-            balance = applyNormalBalance(normalBalance, balance, debit, credit);
+            balance = BalanceCalculator.applyNormalBalance(normalBalance, balance, debit, credit);
 
             totalDebit = totalDebit.add(debit);
             totalCredit = totalCredit.add(credit);
@@ -106,13 +107,5 @@ public class AccountLedgerService {
 
         // 최종 응답
         return new AccountLedgerResponse(openingBalance, closingBalance, items);
-    }
-
-    private BigDecimal applyNormalBalance(
-            NormalBalance normalBalance, BigDecimal base, BigDecimal debit, BigDecimal credit
-    ) {
-        return normalBalance == NormalBalance.DEBIT
-                ? base.add(debit).subtract(credit)
-                : base.add(credit).subtract(debit);
     }
 }

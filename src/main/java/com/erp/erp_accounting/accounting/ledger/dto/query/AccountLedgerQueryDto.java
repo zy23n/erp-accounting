@@ -1,9 +1,8 @@
-package com.erp.erp_accounting.accounting.ledger.dto;
+package com.erp.erp_accounting.accounting.ledger.dto.query;
 
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

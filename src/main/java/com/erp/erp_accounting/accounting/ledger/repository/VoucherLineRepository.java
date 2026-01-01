@@ -1,7 +1,8 @@
-package com.erp.erp_accounting.accounting.voucher.repository;
+package com.erp.erp_accounting.accounting.ledger.repository;
 
-import com.erp.erp_accounting.accounting.ledger.dto.AccountLedgerQueryDto;
-import com.erp.erp_accounting.accounting.ledger.dto.OpeningBalanceDto;
+import com.erp.erp_accounting.accounting.ledger.dto.query.AccountLedgerQueryDto;
+import com.erp.erp_accounting.accounting.ledger.dto.query.MonthlyBalanceQueryDto;
+import com.erp.erp_accounting.accounting.ledger.dto.query.OpeningBalanceDto;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherLine;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +17,7 @@ public interface VoucherLineRepository extends JpaRepository<VoucherLine, Long> 
 
     // 전기이월 잔액 계산
     @Query("""
-        select new com.erp.erp_accounting.accounting.ledger.dto.OpeningBalanceDto(
+        select new com.erp.erp_accounting.accounting.ledger.dto.query.OpeningBalanceDto(
             coalesce(sum(case when vl.type = 'DEBIT' then vl.amount else 0 end), 0),
             coalesce(sum(case when vl.type = 'CREDIT' then vl.amount else 0 end), 0)
         )
@@ -33,7 +34,7 @@ public interface VoucherLineRepository extends JpaRepository<VoucherLine, Long> 
 
     // 원장 조회
     @Query("""
-        select new com.erp.erp_accounting.accounting.ledger.dto.AccountLedgerQueryDto(
+        select new com.erp.erp_accounting.accounting.ledger.dto.query.AccountLedgerQueryDto(
             v.voucherDate,
             v.voucherNo,
             v.description,
@@ -51,5 +52,23 @@ public interface VoucherLineRepository extends JpaRepository<VoucherLine, Long> 
             @Param("accountId") Long accountId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
+    );
+
+    // 이번 달 총합 조회
+    @Query("""
+        select new com.erp.erp_accounting.accounting.ledger.dto.query.MonthlyBalanceQueryDto(
+            coalesce(sum(case when vl.type = 'DEBIT' then vl.amount else 0 end), 0),
+            coalesce(sum(case when vl.type = 'CREDIT' then vl.amount else 0 end), 0)
+        )
+        from VoucherLine vl
+        join vl.voucher v
+        where vl.account.id = :accountId
+          and v.voucherDate between :monthStart and :monthEnd
+          and v.status = 'APPROVED'
+    """)
+    MonthlyBalanceQueryDto findMonthlyTotal(
+            @Param("accountId") Long accountId,
+            @Param("monthStart") LocalDate monthStart,
+            @Param("monthEnd") LocalDate monthEnd
     );
 }

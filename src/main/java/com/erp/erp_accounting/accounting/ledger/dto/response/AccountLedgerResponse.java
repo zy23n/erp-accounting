@@ -1,6 +1,5 @@
 package com.erp.erp_accounting.accounting.ledger.dto.response;
 
-import com.erp.erp_accounting.accounting.ledger.dto.AccountLedgerItemDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
