@@ -36,14 +36,32 @@ public class AccountingPeriod extends BaseEntity {
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
 
-    public void close(User closedBy, LocalDateTime closedAt) {
-        this.status = AccountingPeriodStatus.CLOSED;
-        this.closedBy = closedBy;
-        this.closedAt = closedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reopened_by")
+    private User reopenedBy;
+
+    @Column(name = "reopened_at")
+    private LocalDateTime reopenedAt;
+
+    public static AccountingPeriod open(YearMonth period) {
+        return AccountingPeriod.builder()
+                .period(period)
+                .status(AccountingPeriodStatus.OPEN)
+                .build();
     }
-    public void reopen() {
+
+    public boolean isClosed() {
+        return this.status == AccountingPeriodStatus.CLOSED;
+    }
+
+    public void close(User user) {
+        this.status = AccountingPeriodStatus.CLOSED;
+        this.closedBy = user;
+        this.closedAt = LocalDateTime.now();
+    }
+    public void reopen(User user) {
         this.status = AccountingPeriodStatus.OPEN;
-        this.closedBy = null;
-        this.closedAt = null;
+        this.reopenedBy = user;
+        this.reopenedAt = LocalDateTime.now();
     }
 }

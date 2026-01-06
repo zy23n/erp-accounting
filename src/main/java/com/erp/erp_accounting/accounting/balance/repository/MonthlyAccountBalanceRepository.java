@@ -9,4 +9,6 @@ import java.util.List;
 public interface MonthlyAccountBalanceRepository extends JpaRepository<MonthlyAccountBalance, Long> {
 
     List<MonthlyAccountBalance> findByPeriod(YearMonth period);
+
+    void deleteByPeriod(YearMonth period);
 }

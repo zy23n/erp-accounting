@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.accounting.ledger.repository;
 
+import com.erp.erp_accounting.accounting.balance.dto.query.AccountAmountDto;
 import com.erp.erp_accounting.accounting.ledger.dto.query.AccountLedgerQueryDto;
 import com.erp.erp_accounting.accounting.ledger.dto.query.MonthlyBalanceQueryDto;
 import com.erp.erp_accounting.accounting.ledger.dto.query.OpeningBalanceDto;
@@ -10,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Repository
@@ -70,5 +72,41 @@ public interface VoucherLineRepository extends JpaRepository<VoucherLine, Long> 
             @Param("accountId") Long accountId,
             @Param("monthStart") LocalDate monthStart,
             @Param("monthEnd") LocalDate monthEnd
+    );
+
+    // 특정 기간 차변 합계
+    @Query("""
+        select new com.erp.erp_accounting.accounting.balance.dto.query.AccountAmountDto(
+            vl.account.id,
+            sum(vl.amount)
+        )
+        from VoucherLine vl
+        join vl.voucher v
+        where vl.type = 'DEBIT'
+          and v.voucherDate between :start and :end
+          and v.status = 'APPROVED'
+        group by vl.account.id
+    """)
+    List<AccountAmountDto> findMonthlyDebitSum(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
+
+    // 특정 기간 대변 합계
+    @Query("""
+        select new com.erp.erp_accounting.accounting.balance.dto.query.AccountAmountDto(
+            vl.account.id,
+            sum(vl.amount)
+        )
+        from VoucherLine vl
+        join vl.voucher v
+        where vl.type = 'CREDIT'
+          and v.voucherDate between :start and :end
+          and v.status = 'APPROVED'
+        group by vl.account.id
+    """)
+    List<AccountAmountDto> findMonthlyCreditSum(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
     );
 }

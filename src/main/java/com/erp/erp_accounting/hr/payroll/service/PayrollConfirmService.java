@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.hr.payroll.service;
 
+import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
 import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.service.AutoVoucherService;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherService;
@@ -28,9 +29,13 @@ public class PayrollConfirmService {
     private final PayrollRepository payrollRepository;
     private final AutoVoucherService autoVoucherService;
     private final VoucherService voucherService;
+    private final AccountingPeriodService accountingPeriodService;
 
     // 급여 확정 생성
     public Long createConfirm(YearMonth payMonth) {
+
+        assertPayrollPeriodOpen(payMonth);
+
         if (payrollConfirmRepository.existsByPayMonth(payMonth)) {
             throw new IllegalStateException("이미 해당 월의 급여 확정이 존재");
         }
@@ -48,6 +53,8 @@ public class PayrollConfirmService {
     // 급여 확정 처리 (최초 확정 + 재확정 공용)
     public void confirm(Long payrollConfirmId, Long userId) {
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
+
+        assertPayrollPeriodOpen(confirm.getPayMonth());
 
         // 이미 확정된 상태면 재확정 불가
         if (confirm.getStatus() == PayrollConfirmStatus.CONFIRMED) {
@@ -72,6 +79,8 @@ public class PayrollConfirmService {
     public void cancel(Long payrollConfirmId, Long userId) {
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
+        assertPayrollPeriodOpen(confirm.getPayMonth());
+
         User user = findUser(userId);
 
         // 자동분개 전표 취소
@@ -85,6 +94,11 @@ public class PayrollConfirmService {
         return payrollConfirmRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("급여확정 없음"));
     }
+
+    private void assertPayrollPeriodOpen(YearMonth payMonth) {
+        accountingPeriodService.assertPeriodOpen(payMonth);
+    }
+
     private User findUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));

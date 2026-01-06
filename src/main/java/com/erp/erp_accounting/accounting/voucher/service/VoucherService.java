@@ -2,6 +2,7 @@ package com.erp.erp_accounting.accounting.voucher.service;
 
 import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
+import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateRequest;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherLineRequest;
 import com.erp.erp_accounting.accounting.voucher.entity.*;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -23,8 +26,13 @@ public class VoucherService {
     private final VoucherRepository voucherRepository;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final AccountingPeriodService accountingPeriodService;
 
     public Voucher createVoucher(VoucherCreateRequest request, Long userId) {
+
+        // 회계기간 마감 여부 검증
+        assertVoucherPeriodOpen(request.getVoucherDate());
+
         // 사용자 조회
         User user = findUser(userId);
 
@@ -60,20 +68,26 @@ public class VoucherService {
     }
 
     public Long createAndAutoApprove(VoucherCreateRequest request, Long userId) {
+        assertVoucherPeriodOpen(request.getVoucherDate());
         Voucher voucher = createVoucher(request, userId);
         voucher.approve(voucher.getCreatedBy());
         return voucher.getId();
     }
 
     public void cancelAutoVouchers(SourceType sourceType, Long sourceId, User user) {
-        List<Voucher> vouchers =
-                voucherRepository.findBySourceTypeAndSourceId(sourceType, sourceId);
+        List<Voucher> vouchers = voucherRepository.findBySourceTypeAndSourceId(sourceType, sourceId);
+
+        assertVoucherPeriodOpen(vouchers.get(0).getVoucherDate());
 
         for (Voucher voucher : vouchers) {
             if (voucher.isCancelable()) {
                 voucher.cancel(user);
             }
         }
+    }
+
+    private void assertVoucherPeriodOpen(LocalDate voucherDate) {
+        accountingPeriodService.assertPeriodOpen(YearMonth.from(voucherDate));
     }
 
     private User findUser(Long userId) {

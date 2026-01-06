@@ -1,0 +1,61 @@
+package com.erp.erp_accounting.accounting.balance.service;
+
+import com.erp.erp_accounting.accounting.account.entity.Account;
+import com.erp.erp_accounting.accounting.balance.entity.MonthlyAccountBalance;
+import com.erp.erp_accounting.accounting.common.BalanceCalculator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class MonthlyBalanceCalculationService {
+
+    // 원장 데이터를 기반으로 월별 계정별 잔액 계산
+    public List<MonthlyAccountBalance> calculateMonthlyBalances(
+            List<Account> accounts,
+            Map<Long, BigDecimal> openingBalances,
+            Map<Long, BigDecimal> debitSums,
+            Map<Long, BigDecimal> creditSums,
+            YearMonth period
+    ) {
+        List<MonthlyAccountBalance> result = new ArrayList<>();
+
+        for (Account account : accounts) {
+            if (!account.isLeaf()) continue;
+
+            Long accountId = account.getId();
+
+            BigDecimal opening = openingBalances.getOrDefault(accountId, BigDecimal.ZERO);
+            BigDecimal debit = debitSums.getOrDefault(accountId, BigDecimal.ZERO);
+            BigDecimal credit = creditSums.getOrDefault(accountId, BigDecimal.ZERO);
+
+            if (isZero(opening) && isZero(debit) && isZero(credit)) continue;
+
+            BigDecimal closing = BalanceCalculator.applyNormalBalance(account.getNormalBalance(), opening, debit, credit);
+
+            result.add(
+                    MonthlyAccountBalance.builder()
+                            .account(account)
+                            .period(period)
+                            .openingBalance(opening)
+                            .debitSum(debit)
+                            .creditSum(credit)
+                            .closingBalance(closing)
+                            .normalBalance(account.getNormalBalance())
+                            .build()
+            );
+        }
+
+        return result;
+    }
+
+    private boolean isZero(BigDecimal value) {
+        return value == null || value.compareTo(BigDecimal.ZERO) == 0;
+    }
+}

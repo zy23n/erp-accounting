@@ -9,7 +9,7 @@ import com.erp.erp_accounting.accounting.ledger.dto.request.AccountLedgerRequest
 import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerItemDto;
 import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerResponse;
 import com.erp.erp_accounting.accounting.ledger.repository.VoucherLineRepository;
-import com.erp.erp_accounting.global.util.BalanceCalculator;
+import com.erp.erp_accounting.accounting.common.BalanceCalculator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
