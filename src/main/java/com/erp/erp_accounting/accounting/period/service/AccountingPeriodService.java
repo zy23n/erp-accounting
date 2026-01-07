@@ -30,6 +30,18 @@ public class AccountingPeriodService {
         return accountingPeriod;
     }
 
+    // 마감 상태 확인
+    public boolean isClosed(YearMonth period) {
+        return accountingPeriodRepository.findByPeriod(period)
+                .map(AccountingPeriod::isClosed)
+                .orElse(false);
+    }
+
+    // 이전 월 마감 여부 확인
+    public boolean isPreviousPeriodClosed(YearMonth period) {
+        return isClosed(period.minusMonths(1));
+    }
+
     // 회계기간 사전 생성 (연초 / 초기화용)
     @Transactional
     public AccountingPeriod getOrCreate(YearMonth period) {
