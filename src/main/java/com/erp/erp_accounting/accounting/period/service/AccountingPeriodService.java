@@ -42,6 +42,14 @@ public class AccountingPeriodService {
         return isClosed(period.minusMonths(1));
     }
 
+    public void assertPreviousPeriodClosed(YearMonth period) {
+        if (!isPreviousPeriodClosed(period)) {
+            throw new IllegalStateException(
+                    "이전 회계기간이 마감되지 않았습니다: " + period.minusMonths(1)
+            );
+        }
+    }
+
     // 회계기간 사전 생성 (연초 / 초기화용)
     @Transactional
     public AccountingPeriod getOrCreate(YearMonth period) {

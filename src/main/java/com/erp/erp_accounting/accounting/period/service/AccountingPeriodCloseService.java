@@ -40,6 +40,7 @@ public class AccountingPeriodCloseService {
     public AccountingPeriodResponse closePeriod(YearMonth period, Long userId) {
 
         // 마감 가능 여부 검증
+        accountingPeriodService.assertPreviousPeriodClosed(period);
         AccountingPeriod accountingPeriod = accountingPeriodService.getClosablePeriodOrThrow(period);
 
         User user = findUser(userId);

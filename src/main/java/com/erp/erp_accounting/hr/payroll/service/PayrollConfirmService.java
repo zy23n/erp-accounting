@@ -54,6 +54,7 @@ public class PayrollConfirmService {
     public void confirm(Long payrollConfirmId, Long userId) {
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
+        accountingPeriodService.assertPreviousPeriodClosed(confirm.getPayMonth());
         assertPayrollPeriodOpen(confirm.getPayMonth());
 
         // 이미 확정된 상태면 재확정 불가
