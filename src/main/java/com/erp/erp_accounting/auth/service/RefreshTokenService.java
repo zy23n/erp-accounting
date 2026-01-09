@@ -18,7 +18,6 @@ import java.util.UUID;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Value("${jwt.refresh-expiration-days}")
     private long refreshTokenExpirationDays;
@@ -52,8 +51,15 @@ public class RefreshTokenService {
     }
 
     // 특정 Refresh Token 삭제
-    public void deleteByToken(String token) {
-        refreshTokenRepository.deleteByToken(token);
+    public void logout(String refreshToken, User user) {
+        RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new IllegalArgumentException("Refresh Token 없음"));
+
+        if (!token.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("본인 소유의 Refresh Token 아님");
+        }
+
+        refreshTokenRepository.delete(token);
     }
 
     // 전체 Refresh Token 삭제

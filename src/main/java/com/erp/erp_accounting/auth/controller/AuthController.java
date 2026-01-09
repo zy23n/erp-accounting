@@ -70,8 +70,9 @@ public class AuthController {
 
     // 로그아웃: 특정 Refresh Token 삭제
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
-        refreshTokenService.deleteByToken(request.getRefreshToken());
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request,
+                                    @AuthenticationPrincipal UserPrincipal principal) {
+        refreshTokenService.logout(request.getRefreshToken(), principal.getUser());
         return ResponseEntity.ok(Map.of("message", "로그아웃 완료"));
     }
 

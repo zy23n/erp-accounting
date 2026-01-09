@@ -68,8 +68,8 @@ public class SecurityConfig {
 
                 // 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
-                        .requestMatchers("/api/auth/logout/all").authenticated()
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/logout/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
