@@ -142,13 +142,13 @@ public class Voucher extends BaseEntity {
         return this.status == VoucherStatus.APPROVED;
     }
 
-    public void cancel(User user) {
+    public void cancel(User canceler) {
         if (!isCancelable()) {
             throw new IllegalStateException("승인된 전표만 취소 가능");
         }
 
         this.status = VoucherStatus.CANCELED;
-        this.canceledBy = user;
+        this.canceledBy = canceler;
         this.canceledAt = LocalDateTime.now();
     }
 }

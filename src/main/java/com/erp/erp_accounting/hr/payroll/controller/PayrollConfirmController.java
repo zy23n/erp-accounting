@@ -1,8 +1,10 @@
 package com.erp.erp_accounting.hr.payroll.controller;
 
 import com.erp.erp_accounting.hr.payroll.service.PayrollConfirmService;
+import com.erp.erp_accounting.security.principal.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
@@ -25,9 +27,9 @@ public class PayrollConfirmController {
     @PostMapping("/{payrollConfirmId}/confirm")
     public ResponseEntity<Void> confirm(
             @PathVariable("payrollConfirmId") Long payrollConfirmId,
-            @RequestParam("userId") Long userId // 추후 로그인/권한 적용
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        payrollConfirmService.confirm(payrollConfirmId, userId);
+        payrollConfirmService.confirm(payrollConfirmId, principal.getUser());
         return ResponseEntity.ok().build();
     }
 
@@ -35,9 +37,9 @@ public class PayrollConfirmController {
     @PostMapping("/{payrollConfirmId}/cancel")
     public ResponseEntity<Void> cancel(
             @PathVariable("payrollConfirmId") Long payrollConfirmId,
-            @RequestParam("userId") Long userId // 추후 로그인/권한 적용
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        payrollConfirmService.cancel(payrollConfirmId, userId);
+        payrollConfirmService.cancel(payrollConfirmId, principal.getUser());
         return ResponseEntity.ok().build();
     }
 }

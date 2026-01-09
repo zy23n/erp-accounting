@@ -11,7 +11,6 @@ import com.erp.erp_accounting.hr.payroll.entity.PayrollStatus;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollConfirmRepository;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
 import com.erp.erp_accounting.user.entity.User;
-import com.erp.erp_accounting.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +24,6 @@ import java.util.List;
 public class PayrollConfirmService {
 
     private final PayrollConfirmRepository payrollConfirmRepository;
-    private final UserRepository userRepository;
     private final PayrollRepository payrollRepository;
     private final AutoVoucherService autoVoucherService;
     private final VoucherService voucherService;
@@ -51,7 +49,7 @@ public class PayrollConfirmService {
     }
 
     // 급여 확정 처리 (최초 확정 + 재확정 공용)
-    public void confirm(Long payrollConfirmId, Long userId) {
+    public void confirm(Long payrollConfirmId, User confirmer) {
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
         accountingPeriodService.assertPreviousPeriodClosed(confirm.getPayMonth());
@@ -62,8 +60,6 @@ public class PayrollConfirmService {
             throw new IllegalStateException("이미 확정된 급여확정");
         }
 
-        User user = findUser(userId);
-
         // 해당 월의 계산 완료된 급여 조회
         List<Payroll> payrolls = getCalculatedPayrolls(confirm.getPayMonth());
 
@@ -72,23 +68,21 @@ public class PayrollConfirmService {
         payrolls.forEach(confirm::addPayroll);
 
         // 급여 확정 + 자동분개
-        confirm.confirm(user);
+        confirm.confirm(confirmer);
         autoVoucherService.createFromPayrollConfirm(confirm);
     }
 
     // 급여 확정 취소
-    public void cancel(Long payrollConfirmId, Long userId) {
+    public void cancel(Long payrollConfirmId, User canceler) {
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
         assertPayrollPeriodOpen(confirm.getPayMonth());
 
-        User user = findUser(userId);
-
         // 자동분개 전표 취소
-        voucherService.cancelAutoVouchers(SourceType.PAYROLL, confirm.getId(), user);
+        voucherService.cancelAutoVouchers(SourceType.PAYROLL, confirm.getId(), canceler);
 
         // 급여 확정 취소
-        confirm.cancel(user);
+        confirm.cancel(canceler);
     }
 
     private PayrollConfirm findConfirm(Long id) {
@@ -98,11 +92,6 @@ public class PayrollConfirmService {
 
     private void assertPayrollPeriodOpen(YearMonth payMonth) {
         accountingPeriodService.assertPeriodOpen(payMonth);
-    }
-
-    private User findUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     }
 
     private List<Payroll> getCalculatedPayrolls(YearMonth payMonth) {

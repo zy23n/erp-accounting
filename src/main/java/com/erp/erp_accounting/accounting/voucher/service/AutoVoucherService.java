@@ -66,7 +66,7 @@ public class AutoVoucherService {
         );
 
         // 전표 생성 + 자동 승인
-        voucherService.createAndAutoApprove(request, confirm.getConfirmedBy().getId());
+        voucherService.createAndAutoApprove(request, confirm.getConfirmedBy());
     }
 
     private void addDebit(List<VoucherLineRequest> lines, Long accountId, BigDecimal amount) {

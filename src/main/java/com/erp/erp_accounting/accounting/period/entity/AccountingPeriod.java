@@ -54,14 +54,14 @@ public class AccountingPeriod extends BaseEntity {
         return this.status == AccountingPeriodStatus.CLOSED;
     }
 
-    public void close(User user) {
+    public void close(User closer) {
         this.status = AccountingPeriodStatus.CLOSED;
-        this.closedBy = user;
+        this.closedBy = closer;
         this.closedAt = LocalDateTime.now();
     }
-    public void reopen(User user) {
+    public void reopen(User reopener) {
         this.status = AccountingPeriodStatus.OPEN;
-        this.reopenedBy = user;
+        this.reopenedBy = reopener;
         this.reopenedAt = LocalDateTime.now();
     }
 }

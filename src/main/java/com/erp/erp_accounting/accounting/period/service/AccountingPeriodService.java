@@ -72,16 +72,16 @@ public class AccountingPeriodService {
     }
 
     @Transactional
-    public void close(YearMonth period, User user) {
+    public void close(YearMonth period, User closer) {
         AccountingPeriod accountingPeriod = getByPeriod(period);
         validator.assertClosable(accountingPeriod);
-        accountingPeriod.close(user);
+        accountingPeriod.close(closer);
     }
 
     @Transactional
-    public void reopen(YearMonth period, User user) {
+    public void reopen(YearMonth period, User reopener) {
         AccountingPeriod accountingPeriod = getByPeriod(period);
         validator.assertReopenable(accountingPeriod);
-        accountingPeriod.reopen(user);
+        accountingPeriod.reopen(reopener);
     }
 }

@@ -28,13 +28,10 @@ public class VoucherService {
     private final AccountRepository accountRepository;
     private final AccountingPeriodService accountingPeriodService;
 
-    public Voucher createVoucher(VoucherCreateRequest request, Long userId) {
+    public Voucher createVoucher(VoucherCreateRequest request, User user) {
 
         // 회계기간 마감 여부 검증
         assertVoucherPeriodOpen(request.getVoucherDate());
-
-        // 사용자 조회
-        User user = findUser(userId);
 
         // 전표 라인 검증
         validateLines(request);
@@ -67,32 +64,27 @@ public class VoucherService {
         return voucher;
     }
 
-    public Long createAndAutoApprove(VoucherCreateRequest request, Long userId) {
+    public Long createAndAutoApprove(VoucherCreateRequest request, User user) {
         assertVoucherPeriodOpen(request.getVoucherDate());
-        Voucher voucher = createVoucher(request, userId);
+        Voucher voucher = createVoucher(request, user);
         voucher.approve(voucher.getCreatedBy());
         return voucher.getId();
     }
 
-    public void cancelAutoVouchers(SourceType sourceType, Long sourceId, User user) {
+    public void cancelAutoVouchers(SourceType sourceType, Long sourceId, User canceler) {
         List<Voucher> vouchers = voucherRepository.findBySourceTypeAndSourceId(sourceType, sourceId);
 
         assertVoucherPeriodOpen(vouchers.get(0).getVoucherDate());
 
         for (Voucher voucher : vouchers) {
             if (voucher.isCancelable()) {
-                voucher.cancel(user);
+                voucher.cancel(canceler);
             }
         }
     }
 
     private void assertVoucherPeriodOpen(LocalDate voucherDate) {
         accountingPeriodService.assertPeriodOpen(YearMonth.from(voucherDate));
-    }
-
-    private User findUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     }
 
     private void validateLines(VoucherCreateRequest request) {

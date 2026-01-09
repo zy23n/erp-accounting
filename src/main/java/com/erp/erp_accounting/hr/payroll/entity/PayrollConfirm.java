@@ -78,26 +78,26 @@ public class PayrollConfirm extends BaseEntity {
     }
 
     // 확정 (최초 확정 + 재확정 공용)
-    public void confirm(User user) {
+    public void confirm(User confirmer) {
         if (this.status == PayrollConfirmStatus.CONFIRMED) {
             throw new IllegalStateException("이미 확정된 급여확정");
         }
 
         this.status = PayrollConfirmStatus.CONFIRMED;
-        this.confirmedBy = user;
+        this.confirmedBy = confirmer;
         this.confirmedAt = LocalDateTime.now();
 
         this.payrolls.forEach(Payroll::markConfirmed);
     }
 
     // 확정 취소
-    public void cancel(User user) {
+    public void cancel(User canceler) {
         if (this.status != PayrollConfirmStatus.CONFIRMED) {
             throw new IllegalStateException("확정된 급여만 취소 가능");
         }
 
         this.status = PayrollConfirmStatus.CANCELED;
-        this.canceledBy = user;
+        this.canceledBy = canceler;
         this.canceledAt = LocalDateTime.now();
 
         this.payrolls.forEach(Payroll::rollbackToCalculated);

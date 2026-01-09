@@ -10,7 +10,6 @@ import com.erp.erp_accounting.accounting.balance.service.MonthlyBalanceCalculati
 import com.erp.erp_accounting.accounting.period.dto.response.AccountingPeriodResponse;
 import com.erp.erp_accounting.accounting.period.entity.AccountingPeriod;
 import com.erp.erp_accounting.user.entity.User;
-import com.erp.erp_accounting.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,16 +33,13 @@ public class AccountingPeriodCloseService {
     private final MonthlyBalanceCalculationService balanceCalculationService;
     private final AccountRepository accountRepository;
     private final VoucherLineRepository voucherLineRepository;
-    private final UserRepository userRepository;
 
     // 회계기간 마감
-    public AccountingPeriodResponse closePeriod(YearMonth period, Long userId) {
+    public AccountingPeriodResponse closePeriod(YearMonth period, User closer) {
 
         // 마감 가능 여부 검증
         accountingPeriodService.assertPreviousPeriodClosed(period);
         AccountingPeriod accountingPeriod = accountingPeriodService.getClosablePeriodOrThrow(period);
-
-        User user = findUser(userId);
 
         // 마감 대상 계정 조회 (말단 계정만)
         List<Account> leafAccounts = accountRepository.findLeafAccounts();
@@ -71,30 +67,23 @@ public class AccountingPeriodCloseService {
         monthlyAccountBalanceRepository.saveAll(balances);
 
         // 회계기간 상태 변경
-        accountingPeriodService.close(period, user);
+        accountingPeriodService.close(period, closer);
 
         return toResponse(accountingPeriod);
     }
 
     // 회계기간 마감 취소
-    public AccountingPeriodResponse reopenPeriod(YearMonth period, Long userId) {
-
-        User user = findUser(userId);
+    public AccountingPeriodResponse reopenPeriod(YearMonth period, User reopener) {
 
         // 스냅샷 제거
         monthlyAccountBalanceRepository.deleteByPeriod(period);
 
         // 회계기간 상태 변경
-        accountingPeriodService.reopen(period, user);
+        accountingPeriodService.reopen(period, reopener);
 
         AccountingPeriod reopenedPeriod = accountingPeriodService.getByPeriod(period);
 
         return toResponse(reopenedPeriod);
-    }
-
-    private User findUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     }
 
     private Map<Long, BigDecimal> loadPreviousClosingBalances(YearMonth previousPeriod) {
