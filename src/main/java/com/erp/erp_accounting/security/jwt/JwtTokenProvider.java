@@ -20,7 +20,7 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration-ms}")
+    @Value("${jwt.access-expiration-ms}")
     private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
@@ -28,7 +28,7 @@ public class JwtTokenProvider {
     }
 
     // JWT 생성
-    public String generateToken(UserPrincipal userPrincipal) {
+    public String generateAccessToken(UserPrincipal userPrincipal) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 

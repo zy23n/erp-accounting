@@ -1,4 +1,4 @@
-package com.erp.erp_accounting.security.dto.request;
+package com.erp.erp_accounting.auth.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
