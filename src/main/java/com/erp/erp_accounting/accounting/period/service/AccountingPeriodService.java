@@ -39,7 +39,9 @@ public class AccountingPeriodService {
 
     // 이전 월 마감 여부 확인
     public boolean isPreviousPeriodClosed(YearMonth period) {
-        return isClosed(period.minusMonths(1));
+        return accountingPeriodRepository.findByPeriod(period.minusMonths(1))
+                .map(AccountingPeriod::isClosed)
+                .orElse(true);
     }
 
     public void assertPreviousPeriodClosed(YearMonth period) {
