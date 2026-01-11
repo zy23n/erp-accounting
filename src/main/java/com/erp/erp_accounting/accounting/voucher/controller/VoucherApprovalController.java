@@ -5,6 +5,7 @@ import com.erp.erp_accounting.accounting.voucher.service.VoucherApprovalService;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ public class VoucherApprovalController {
 
     // 승인
     @PatchMapping("/{voucherId}/approve")
+    @PreAuthorize("hasRole('ACCOUNTING')")
     public ResponseEntity<VoucherApprovalResponse> approve(
             @PathVariable("voucherId") Long voucherId,
             @AuthenticationPrincipal UserPrincipal principal
@@ -26,6 +28,7 @@ public class VoucherApprovalController {
 
     // 반려
     @PatchMapping("/{voucherId}/reject")
+    @PreAuthorize("hasRole('ACCOUNTING')")
     public ResponseEntity<VoucherApprovalResponse> reject(
             @PathVariable("voucherId") Long voucherId,
             @AuthenticationPrincipal UserPrincipal principal

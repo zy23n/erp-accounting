@@ -5,7 +5,9 @@ import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherApprovalRes
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.user.entity.User;
+import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +22,13 @@ public class VoucherApprovalService {
     private final AccountingPeriodService accountingPeriodService;
 
     public VoucherApprovalResponse approve(Long voucherId, User approver) {
+
         Voucher voucher = findVoucher(voucherId);
+
+        if (!approver.getRoles().contains(UserRole.ACCOUNTING)) {
+            throw new AccessDeniedException("회계 담당자만 전표 승인 가능");
+        }
+
         assertPeriodOpen(voucher);
 
         voucher.approve(approver);
@@ -29,7 +37,13 @@ public class VoucherApprovalService {
     }
 
     public VoucherApprovalResponse reject(Long voucherId, User approver) {
+
         Voucher voucher = findVoucher(voucherId);
+
+        if (!approver.getRoles().contains(UserRole.ACCOUNTING)) {
+            throw new AccessDeniedException("회계 담당자만 전표 반려 가능");
+        }
+
         assertPeriodOpen(voucher);
 
         voucher.reject(approver);

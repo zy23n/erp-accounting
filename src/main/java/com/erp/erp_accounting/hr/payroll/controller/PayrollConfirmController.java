@@ -4,6 +4,7 @@ import com.erp.erp_accounting.hr.payroll.service.PayrollConfirmService;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ public class PayrollConfirmController {
 
     // 급여 확정 처리
     @PostMapping("/{payrollConfirmId}/confirm")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<Void> confirm(
             @PathVariable("payrollConfirmId") Long payrollConfirmId,
             @AuthenticationPrincipal UserPrincipal principal
@@ -35,6 +37,7 @@ public class PayrollConfirmController {
 
     // 급여 확정 취소
     @PostMapping("/{payrollConfirmId}/cancel")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<Void> cancel(
             @PathVariable("payrollConfirmId") Long payrollConfirmId,
             @AuthenticationPrincipal UserPrincipal principal

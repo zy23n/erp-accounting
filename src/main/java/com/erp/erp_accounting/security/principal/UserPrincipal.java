@@ -1,6 +1,7 @@
 package com.erp.erp_accounting.security.principal;
 
 import com.erp.erp_accounting.user.entity.User;
+import com.erp.erp_accounting.user.entity.UserRole;
 import com.erp.erp_accounting.user.entity.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UserPrincipal implements UserDetails {
 
@@ -21,9 +24,19 @@ public class UserPrincipal implements UserDetails {
         return user;
     }
 
+    public Long getId() {
+        return user.getId();
+    }
+
+    public boolean hasRole(UserRole role) {
+        return user.getRoles().contains(role);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole().getAuthority()));
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -8,7 +8,6 @@ import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherLineRequest;
 import com.erp.erp_accounting.accounting.voucher.entity.*;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.user.entity.User;
-import com.erp.erp_accounting.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,6 @@ import java.util.List;
 public class VoucherService {
 
     private final VoucherRepository voucherRepository;
-    private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final AccountingPeriodService accountingPeriodService;
 

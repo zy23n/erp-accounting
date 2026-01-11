@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -68,11 +69,31 @@ public class SecurityConfig {
 
                 // 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
-                        .requestMatchers("/api/auth/logout/**").authenticated()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                                .requestMatchers("/api/auth/logout/**").authenticated()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/closing/**").hasRole("ADMIN")
+
+                                // ACCOUNTING
+                                .requestMatchers(HttpMethod.GET, ApiRoles.ACCOUNTING_APIS).hasAnyRole("ACCOUNTING", "ADMIN")
+
+                                // ACCOUNTING
+                                .requestMatchers(HttpMethod.POST, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
+                                .requestMatchers(HttpMethod.PATCH, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
+                                .requestMatchers(HttpMethod.PUT, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
+                                .requestMatchers(HttpMethod.DELETE, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
+
+                                // HR
+                                .requestMatchers(HttpMethod.GET, ApiRoles.HR_APIS).authenticated()
+
+                                // HR
+                                .requestMatchers(HttpMethod.POST, ApiRoles.HR_APIS).hasRole("HR")
+                                .requestMatchers(HttpMethod.PATCH, ApiRoles.HR_APIS).hasRole("HR")
+                                .requestMatchers(HttpMethod.PUT, ApiRoles.HR_APIS).hasRole("HR")
+                                .requestMatchers(HttpMethod.DELETE, ApiRoles.HR_APIS).hasRole("HR")
+
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .anyRequest().authenticated()
                 )
 
                 // JWT 필터 등록
@@ -90,22 +111,22 @@ public class SecurityConfig {
                             response.setCharacterEncoding("UTF-8");
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                             response.getWriter().write("""
-                                {
-                                  "status": 401,
-                                  "message": "인증 실패"
-                                }
-                            """);
+                                        {
+                                          "status": 401,
+                                          "message": "%s"
+                                        }
+                                    """.formatted(authException.getMessage()));
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setCharacterEncoding("UTF-8");
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                             response.getWriter().write("""
-                                {
-                                  "status": 403,
-                                  "message": "권한 없음"
-                                }
-                            """);
+                                        {
+                                          "status": 403,
+                                          "message": "%s"
+                                        }
+                                    """.formatted(accessDeniedException.getMessage()));
                         })
                 );
 

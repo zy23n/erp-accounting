@@ -4,6 +4,9 @@ import com.erp.erp_accounting.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -18,11 +21,13 @@ public class User extends BaseEntity {
     private String username; // 로그인 ID
 
     @Column(nullable = false)
-    private String password; // 추후 BCrypt 암호화 예정
+    private String password;
 
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role; // USER, ADMIN
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role", nullable = false)
+    private Set<UserRole> roles = new HashSet<>(); // USER, ADMIN
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -32,10 +37,10 @@ public class User extends BaseEntity {
     private boolean locked;
 
     @Builder
-    public User(String username, String password, UserRole role) {
+    public User(String username, String password, Set<UserRole> roles) {
         this.username = username;
         this.password = password;
-        this.role = role;
+        this.roles = roles;
         this.status = UserStatus.ACTIVE;
         this.locked = false;
     }
