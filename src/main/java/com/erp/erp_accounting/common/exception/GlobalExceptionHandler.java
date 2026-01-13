@@ -13,7 +13,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
 
-        return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getCode(), e.getMessage()));
+        String message = (e.getDetailMessage() != null) ? e.getDetailMessage() : e.getErrorCode().getMessage();
+
+        return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getCode(), message));
     }
 
     // 파라미터 검증 에러 (@Valid)
@@ -33,6 +35,9 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다."));
+                .body(new ErrorResponse(
+                        ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
+                        ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
+                );
     }
 }

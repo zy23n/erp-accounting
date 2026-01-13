@@ -3,6 +3,7 @@ package com.erp.erp_accounting.accounting.period.service;
 import com.erp.erp_accounting.accounting.period.entity.AccountingPeriod;
 import com.erp.erp_accounting.accounting.period.repository.AccountingPeriodRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,7 +49,7 @@ public class AccountingPeriodService {
 
     public void assertPreviousPeriodClosed(YearMonth period) {
         if (!isPreviousPeriodClosed(period)) {
-            throw new BusinessException("PERIOD_NOT_CLOSED", HttpStatus.CONFLICT, "이전 회계기간 미마감");
+            throw new BusinessException(ErrorCode.PERIOD_NOT_CLOSED);
         }
     }
 

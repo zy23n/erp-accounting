@@ -1,13 +1,13 @@
 package com.erp.erp_accounting.accounting.voucher.entity;
 
 import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.global.entity.BaseEntity;
 import com.erp.erp_accounting.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -96,7 +96,7 @@ public class Voucher extends BaseEntity {
     // 상태 변경 헬퍼 메서드
     private void assertDraft() {
         if (this.status != VoucherStatus.DRAFT) {
-            throw new BusinessException("VOUCHER_NOT_DRAFT", HttpStatus.BAD_REQUEST, "DRAFT 상태의 전표만 처리 가능");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
     }
 
