@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.hr.payroll.entity;
 
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.global.entity.BaseEntity;
 import com.erp.erp_accounting.user.entity.User;
 import jakarta.persistence.*;
@@ -47,19 +49,19 @@ public class PayrollConfirm extends BaseEntity {
 
     public void addPayroll(Payroll payroll) {
         if (this.status == PayrollConfirmStatus.CONFIRMED) {
-            throw new IllegalStateException("확정된 급여에는 급여 추가 불가");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         if (payroll.getPayrollConfirm() != null) {
-            throw new IllegalStateException("이미 다른 급여 확정에 포함된 급여는 추가 불가");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         if (!this.payMonth.equals(payroll.getPayMonth())) {
-            throw new IllegalStateException("급여 월이 급여 확정 월과 불일치");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         if (payroll.getStatus() != PayrollStatus.CALCULATED) {
-            throw new IllegalStateException("CALCULATED 상태의 급여만 확정 가능");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         payrolls.add(payroll);
@@ -80,7 +82,7 @@ public class PayrollConfirm extends BaseEntity {
     // 확정 (최초 확정 + 재확정 공용)
     public void confirm(User confirmer) {
         if (this.status == PayrollConfirmStatus.CONFIRMED) {
-            throw new IllegalStateException("이미 확정된 급여확정");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         this.status = PayrollConfirmStatus.CONFIRMED;
@@ -93,7 +95,7 @@ public class PayrollConfirm extends BaseEntity {
     // 확정 취소
     public void cancel(User canceler) {
         if (this.status != PayrollConfirmStatus.CONFIRMED) {
-            throw new IllegalStateException("확정된 급여만 취소 가능");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         this.status = PayrollConfirmStatus.CANCELED;

@@ -6,6 +6,8 @@ import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,7 @@ public class VoucherQueryService {
     public VoucherResponse getVoucher(Long voucherId) {
 
         Voucher voucher = voucherRepository.findWithLinesById(voucherId)
-                .orElseThrow(() -> new IllegalArgumentException("전표 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         return toResponse(voucher);
     }

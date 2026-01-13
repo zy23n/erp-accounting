@@ -4,6 +4,8 @@ import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherApprovalResponse;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +55,7 @@ public class VoucherApprovalService {
 
     private Voucher findVoucher(Long voucherId) {
         return voucherRepository.findById(voucherId)
-                .orElseThrow(() -> new IllegalArgumentException("전표 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     private void assertPeriodOpen(Voucher voucher) {

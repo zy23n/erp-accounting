@@ -12,6 +12,8 @@ import com.erp.erp_accounting.accounting.ledger.dto.response.MonthlyAccountBalan
 import com.erp.erp_accounting.accounting.ledger.repository.VoucherLineRepository;
 import com.erp.erp_accounting.accounting.common.BalanceCalculator;
 import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,7 +45,7 @@ public class MonthlyAccountBalanceService {
         MonthlyAccountBalance balance =
                 monthlyAccountBalanceRepository
                         .findByPeriodAndAccountId(request.getMonth(), request.getAccountId())
-                        .orElseThrow(() -> new IllegalStateException("마감된 회계 기간의 월 스냅샷 없음"));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         return new MonthlyAccountBalanceResponse(
                 balance.getOpeningBalance(),
@@ -57,7 +59,7 @@ public class MonthlyAccountBalanceService {
     private MonthlyAccountBalanceResponse getRealtimeBalance(MonthlyAccountBalanceRequest request) {
 
         Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new EntityNotFoundException("계정과목 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         NormalBalance normalBalance = account.getNormalBalance();
 

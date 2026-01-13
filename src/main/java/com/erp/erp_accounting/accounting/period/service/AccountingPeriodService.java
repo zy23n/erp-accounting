@@ -6,7 +6,6 @@ import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,7 @@ public class AccountingPeriodService {
     // 특정 회계기간 조회
     public AccountingPeriod getByPeriod(YearMonth period) {
         return accountingPeriodRepository.findByPeriod(period)
-                .orElseThrow(() -> new IllegalStateException("회계기간 없음: " + period));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     // 마감 가능한 회계기간 조회

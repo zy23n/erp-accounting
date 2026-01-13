@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.hr.payroll.entity;
 
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.global.entity.BaseEntity;
 import com.erp.erp_accounting.hr.employee.entity.Employee;
 import jakarta.persistence.*;
@@ -62,25 +64,19 @@ public class Payroll extends BaseEntity {
     // 총 급여 계산
     public void calculateNetAmount() {
         if (baseSalary == null || allowanceAmount == null || deductionAmount == null) {
-            throw new IllegalStateException("급여, 수당, 공제 금액이 모두 있어야 계산 가능");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
         this.netAmount = baseSalary.add(allowanceAmount).subtract(deductionAmount);
         this.status = PayrollStatus.CALCULATED;
     }
 
     public void markConfirmed() {
-        if (this.status != PayrollStatus.CALCULATED) {
-            throw new IllegalStateException("CALCULATED 상태의 급여만 확정 가능");
-        }
-
+        if (this.status != PayrollStatus.CALCULATED) throw new BusinessException(ErrorCode.INVALID_STATE);
         this.status = PayrollStatus.CONFIRMED;
     }
 
     public void rollbackToCalculated() {
-        if (this.status != PayrollStatus.CONFIRMED) {
-            throw new IllegalStateException("CONFIRMED 상태만 CALCULATED로 롤백 가능");
-        }
-
+        if (this.status != PayrollStatus.CONFIRMED) throw new BusinessException(ErrorCode.INVALID_STATE);
         this.status = PayrollStatus.CALCULATED;
     }
 

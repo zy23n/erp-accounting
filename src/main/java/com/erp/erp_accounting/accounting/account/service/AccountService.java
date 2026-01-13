@@ -3,6 +3,8 @@ package com.erp.erp_accounting.accounting.account.service;
 import com.erp.erp_accounting.accounting.account.dto.response.AccountTreeResponse;
 import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -63,11 +65,11 @@ public class AccountService {
             case BONUS -> code = "1020";
             case DEDUCTION -> code = "2010";
             case CASH -> code = "1011";
-            default -> throw new IllegalArgumentException("알 수 없는 급여 항목: " + item);
+            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
 
         return accountRepository.findByCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("계정 없음: " + code))
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND))
                 .getId();
     }
 }

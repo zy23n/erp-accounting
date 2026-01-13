@@ -7,6 +7,8 @@ import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherStatus;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollItem;
@@ -33,9 +35,7 @@ public class AutoVoucherService {
         boolean existsActiveVoucher =
                 voucherRepository.existsBySourceTypeAndSourceIdAndStatusNot(
                     SourceType.PAYROLL, confirm.getId(), VoucherStatus.CANCELED);
-        if (existsActiveVoucher) {
-            throw new IllegalStateException("이미 자동분개 전표 존재");
-        }
+        if (existsActiveVoucher) throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
 
         List<VoucherLineRequest> lines = new ArrayList<>();
 

@@ -2,7 +2,8 @@ package com.erp.erp_accounting.auth.service;
 
 import com.erp.erp_accounting.auth.entity.RefreshToken;
 import com.erp.erp_accounting.auth.repository.RefreshTokenRepository;
-import com.erp.erp_accounting.security.jwt.JwtTokenProvider;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,10 +42,10 @@ public class RefreshTokenService {
     public RefreshToken validateRefreshToken(String token) {
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Refresh Token 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Refresh Token 만료");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         return refreshToken;
@@ -53,10 +54,10 @@ public class RefreshTokenService {
     // 특정 Refresh Token 삭제
     public void logout(String refreshToken, User user) {
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new IllegalArgumentException("Refresh Token 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!token.getUser().getId().equals(user.getId())) {
-            throw new SecurityException("본인 소유의 Refresh Token 아님");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
 
         refreshTokenRepository.delete(token);

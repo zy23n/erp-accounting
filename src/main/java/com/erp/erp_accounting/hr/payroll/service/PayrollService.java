@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.hr.payroll.service;
 
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.employee.entity.Employee;
 import com.erp.erp_accounting.hr.employee.repository.EmployeeRepository;
 import com.erp.erp_accounting.hr.payroll.dto.request.PayrollCreateRequest;
@@ -19,7 +21,7 @@ public class PayrollService {
 
     public Long createPayroll(PayrollCreateRequest request) {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
-                .orElseThrow(() -> new IllegalArgumentException("직원 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         boolean exists = payrollRepository
                 .existsByEmployee_IdAndPayMonth(
@@ -27,9 +29,7 @@ public class PayrollService {
                         request.getPayMonth()
                 );
 
-        if (exists) {
-            throw new IllegalStateException("이미 해당 월의 급여가 존재");
-        }
+        if (exists) throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
 
         Payroll payroll = Payroll.builder()
                 .employee(employee)

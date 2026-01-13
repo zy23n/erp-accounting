@@ -7,6 +7,8 @@ import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateReques
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherLineRequest;
 import com.erp.erp_accounting.accounting.voucher.entity.*;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -87,7 +89,7 @@ public class VoucherService {
 
     private void validateLines(VoucherCreateRequest request) {
         if (request.getLines() == null || request.getLines().isEmpty()) {
-            throw new IllegalArgumentException("전표 라인은 최소 1개 이상 필요합니다.");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
 
         // 대차검증
@@ -102,16 +104,14 @@ public class VoucherService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (debitSum.compareTo(creditSum) != 0) {
-            throw new IllegalArgumentException("차변과 대변의 합계 불일치");
+            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT);
         }
     }
 
     private VoucherLine createVoucherLine(VoucherLineRequest lineRequest) {
         Account account = findAccount(lineRequest.getAccountId());
 
-        if (!account.isLeaf()) {
-            throw new IllegalArgumentException("하위 계정이 있는 계정에는 전표 입력 불가");
-        }
+        if (!account.isLeaf()) throw new BusinessException(ErrorCode.INVALID_STATE);
 
         return VoucherLine.builder()
                 .account(account)
@@ -122,15 +122,10 @@ public class VoucherService {
 
     private Account findAccount(Long accountId) {
         return accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("계정과목 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     private String generateVoucherNo() {
         return "V" + System.currentTimeMillis();
-    }
-
-    @Transactional(readOnly = true)
-    public boolean existsBySource(SourceType sourceType, Long sourceId) {
-        return voucherRepository.existsBySourceTypeAndSourceId(sourceType, sourceId);
     }
 }

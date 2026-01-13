@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.hr.payroll.service;
 
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollConfirmResponse;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollConfirmListResponse;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
@@ -23,7 +25,7 @@ public class PayrollConfirmQueryService {
     // 단건 조회
     public PayrollConfirmResponse getPayrollConfirm(Long payrollConfirmId) {
         PayrollConfirm confirm = payrollConfirmRepository.findDetailById(payrollConfirmId)
-                .orElseThrow(() -> new IllegalArgumentException("급여확정 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         List<PayrollResponse> payrolls = confirm.getPayrolls().stream()
                 .map(this::toPayrollResponse)

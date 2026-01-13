@@ -4,6 +4,8 @@ import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
 import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.service.AutoVoucherService;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherService;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirmStatus;
@@ -35,7 +37,7 @@ public class PayrollConfirmService {
         assertPayrollPeriodOpen(payMonth);
 
         if (payrollConfirmRepository.existsByPayMonth(payMonth)) {
-            throw new IllegalStateException("이미 해당 월의 급여 확정이 존재");
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
         }
 
         getCalculatedPayrolls(payMonth); // 해당 월의 계산 완료된 급여 유무 검증
@@ -57,7 +59,7 @@ public class PayrollConfirmService {
 
         // 이미 확정된 상태면 재확정 불가
         if (confirm.getStatus() == PayrollConfirmStatus.CONFIRMED) {
-            throw new IllegalStateException("이미 확정된 급여확정");
+            throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
         // 해당 월의 계산 완료된 급여 조회
@@ -87,7 +89,7 @@ public class PayrollConfirmService {
 
     private PayrollConfirm findConfirm(Long id) {
         return payrollConfirmRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("급여확정 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     private void assertPayrollPeriodOpen(YearMonth payMonth) {
@@ -98,9 +100,8 @@ public class PayrollConfirmService {
         List<Payroll> payrolls =
                 payrollRepository.findByPayMonthAndStatus(payMonth, PayrollStatus.CALCULATED);
 
-        if (payrolls.isEmpty()) {
-            throw new IllegalStateException("확정 가능한 급여 없음");
-        }
+        if (payrolls.isEmpty()) throw new BusinessException(ErrorCode.INVALID_STATE);
+
         return payrolls;
     }
 }

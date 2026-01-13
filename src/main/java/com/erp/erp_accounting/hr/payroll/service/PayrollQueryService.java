@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.hr.payroll.service;
 
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
@@ -22,7 +24,7 @@ public class PayrollQueryService {
     // 급여 상세 조회
     public PayrollResponse getPayroll(Long payrollId, UserPrincipal principal) {
         Payroll payroll = payrollRepository.findById(payrollId)
-                .orElseThrow(() -> new IllegalArgumentException("급여 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         // HR / ADMIN은 전체 조회 가능
         if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {

@@ -10,6 +10,8 @@ import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerItemDt
 import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerResponse;
 import com.erp.erp_accounting.accounting.ledger.repository.VoucherLineRepository;
 import com.erp.erp_accounting.accounting.common.BalanceCalculator;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,11 +35,11 @@ public class AccountLedgerService {
     public AccountLedgerResponse getAccountLedger(AccountLedgerRequest request) {
 
         if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new IllegalArgumentException("시작일이 종료일보다 클 수 없음");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
 
         Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new EntityNotFoundException("계정과목 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         NormalBalance normalBalance = account.getNormalBalance();
 

@@ -9,6 +9,8 @@ import com.erp.erp_accounting.accounting.balance.repository.MonthlyAccountBalanc
 import com.erp.erp_accounting.accounting.balance.service.MonthlyBalanceCalculationService;
 import com.erp.erp_accounting.accounting.period.dto.response.AccountingPeriodResponse;
 import com.erp.erp_accounting.accounting.period.entity.AccountingPeriod;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -116,8 +118,7 @@ public class AccountingPeriodCloseService {
                 .setScale(2, RoundingMode.HALF_UP);
 
         if (totalDebit.compareTo(totalCredit) != 0) {
-            throw new IllegalStateException(
-                    String.format("월 마감 총계 대차 불일치 [%s] Debit=%s, Credit=%s", period, totalDebit, totalCredit));
+            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT);
         }
     }
 
