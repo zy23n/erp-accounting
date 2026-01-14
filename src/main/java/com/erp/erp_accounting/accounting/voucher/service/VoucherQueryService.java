@@ -3,17 +3,21 @@ package com.erp.erp_accounting.accounting.voucher.service;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherLineResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
-import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +26,23 @@ public class VoucherQueryService {
 
     private final VoucherRepository voucherRepository;
 
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "voucherDate", "voucherNo", "createdAt", "voucherType", "sourceType"
+    );
+
+    public Pageable validateSortFields(Pageable pageable) {
+        List<Sort.Order> safeOrders = pageable.getSort().stream()
+                .filter(order -> ALLOWED_SORT_FIELDS.contains(order.getProperty()))
+                .toList();
+        Sort sort = safeOrders.isEmpty()
+                ? Sort.by(Sort.Order.desc("voucherDate"), Sort.Order.desc("voucherNo"))
+                : Sort.by(safeOrders);
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    }
+
     // 단건 조회
     public VoucherResponse getVoucher(Long voucherId) {
-
         Voucher voucher = voucherRepository.findWithLinesById(voucherId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
@@ -32,8 +50,8 @@ public class VoucherQueryService {
     }
 
     // 목록 조회
-    public List<VoucherListResponse> getVoucherList() {
-        return voucherRepository.findVoucherList(LineType.DEBIT, LineType.CREDIT);
+    public Page<VoucherListResponse> getVoucherList(Pageable pageable) {
+        return voucherRepository.findVoucherList(pageable);
     }
 
     // DTO 변환

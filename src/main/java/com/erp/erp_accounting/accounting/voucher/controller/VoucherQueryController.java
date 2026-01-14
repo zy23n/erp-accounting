@@ -4,11 +4,10 @@ import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListRespons
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherQueryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,17 +20,14 @@ public class VoucherQueryController {
 
     // 단건 조회
     @GetMapping("/{voucherId}")
-    public ResponseEntity<VoucherResponse> getVoucher(
-            @PathVariable("voucherId") Long voucherId
-    ) {
-        return ResponseEntity.ok(
-                voucherQueryService.getVoucher(voucherId)
-        );
+    public ResponseEntity<VoucherResponse> getVoucher(@PathVariable("voucherId") Long voucherId) {
+        return ResponseEntity.ok(voucherQueryService.getVoucher(voucherId));
     }
 
     // 목록 조회
     @GetMapping
-    public ResponseEntity<List<VoucherListResponse>> getVoucherList() {
-        return ResponseEntity.ok(voucherQueryService.getVoucherList());
+    public ResponseEntity<Page<VoucherListResponse>> getVoucherList(Pageable pageable) {
+        Pageable safePageable = voucherQueryService.validateSortFields(pageable);
+        return ResponseEntity.ok(voucherQueryService.getVoucherList(safePageable));
     }
 }

@@ -4,6 +4,8 @@ import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
 import com.erp.erp_accounting.hr.payroll.service.PayrollQueryService;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,11 @@ public class PayrollQueryController {
 
     // 목록 조회
     @GetMapping
-    public ResponseEntity<List<PayrollResponse>> getPayrollList(@AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(payrollQueryService.getPayrollList(principal));
+    public ResponseEntity<Page<PayrollResponse>> getPayrollList(
+            @AuthenticationPrincipal UserPrincipal principal,
+            Pageable pageable
+    ) {
+        Pageable safePageable = payrollQueryService.validateSortFields(pageable);
+        return ResponseEntity.ok(payrollQueryService.getPayrollList(principal, safePageable));
     }
 }
