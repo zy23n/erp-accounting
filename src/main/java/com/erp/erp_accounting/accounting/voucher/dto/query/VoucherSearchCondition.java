@@ -22,4 +22,5 @@ public class VoucherSearchCondition {
     private LocalDate voucherDate;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Long accountId;
 }

@@ -10,6 +10,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -84,7 +85,8 @@ public class VoucherQueryRepositoryImpl implements VoucherQueryRepository {
                             statusEq(cond.getStatus(), v),
                             voucherTypeEq(cond.getVoucherType(), v),
                             sourceTypeEq(cond.getSourceType(), v),
-                            voucherDateBetween(cond.getStartDate(), cond.getEndDate(), cond.getVoucherDate(), v)
+                            voucherDateBetween(cond.getStartDate(), cond.getEndDate(), cond.getVoucherDate(), v),
+                            accountEq(cond.getAccountId(), v)
                     )
                     .groupBy(
                             v.id,
@@ -112,7 +114,8 @@ public class VoucherQueryRepositoryImpl implements VoucherQueryRepository {
                             statusEq(cond.getStatus(), v),
                             voucherTypeEq(cond.getVoucherType(), v),
                             sourceTypeEq(cond.getSourceType(), v),
-                            voucherDateBetween(cond.getStartDate(), cond.getEndDate(), cond.getVoucherDate(), v)
+                            voucherDateBetween(cond.getStartDate(), cond.getEndDate(), cond.getVoucherDate(), v),
+                            accountEq(cond.getAccountId(), v)
                     )
                     .fetchOne();
 
@@ -142,5 +145,20 @@ public class VoucherQueryRepositoryImpl implements VoucherQueryRepository {
         if (start != null) return v.voucherDate.goe(start);
         if (end != null) return v.voucherDate.loe(end);
         return null;
+    }
+
+    private BooleanExpression accountEq(Long accountId, QVoucher v) {
+        if (accountId == null) return null;
+
+        QVoucherLine l = QVoucherLine.voucherLine;
+
+        return JPAExpressions
+                .selectOne()
+                .from(l)
+                .where(
+                        l.voucher.eq(v),
+                        l.account.id.eq(accountId)
+                )
+                .exists();
     }
 }
