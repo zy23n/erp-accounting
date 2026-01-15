@@ -1,9 +1,11 @@
 package com.erp.erp_accounting.accounting.voucher.service;
 
+import com.erp.erp_accounting.accounting.voucher.dto.query.VoucherSearchCondition;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherLineResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
+import com.erp.erp_accounting.accounting.voucher.repository.VoucherQueryRepository;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
@@ -25,6 +27,7 @@ import java.util.Set;
 public class VoucherQueryService {
 
     private final VoucherRepository voucherRepository;
+    private final VoucherQueryRepository voucherQueryRepository;
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "voucherDate", "voucherNo", "createdAt", "voucherType", "sourceType"
@@ -49,9 +52,10 @@ public class VoucherQueryService {
         return toResponse(voucher);
     }
 
-    // 목록 조회
-    public Page<VoucherListResponse> getVoucherList(Pageable pageable) {
-        return voucherRepository.findVoucherList(pageable);
+    // 목록 조회 (QueryDSL)
+    public Page<VoucherListResponse> searchVouchers(VoucherSearchCondition condition, Pageable pageable) {
+        validateCondition(condition);
+        return voucherQueryRepository.search(condition, pageable);
     }
 
     // DTO 변환
@@ -94,5 +98,14 @@ public class VoucherQueryService {
 
     private String username(User user) {
         return user != null ? user.getUsername() : null;
+    }
+
+    private void validateCondition(VoucherSearchCondition cond) {
+        if (cond.getVoucherDate() != null && (cond.getStartDate() != null || cond.getEndDate() != null)) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "voucherDate와 startDate/endDate는 동시에 사용할 수 없습니다.");
+        }
+        if (cond.getStartDate() != null && cond.getEndDate() != null && cond.getStartDate().isAfter(cond.getEndDate())) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "startDate는 endDate보다 이후일 수 없습니다.");
+        }
     }
 }

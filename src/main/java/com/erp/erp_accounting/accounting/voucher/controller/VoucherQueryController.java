@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.accounting.voucher.controller;
 
+import com.erp.erp_accounting.accounting.voucher.dto.query.VoucherSearchCondition;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherQueryService;
@@ -8,8 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/vouchers")
@@ -26,8 +25,10 @@ public class VoucherQueryController {
 
     // 목록 조회
     @GetMapping
-    public ResponseEntity<Page<VoucherListResponse>> getVoucherList(Pageable pageable) {
+    public ResponseEntity<Page<VoucherListResponse>> getVoucherList(
+            @ModelAttribute VoucherSearchCondition condition, Pageable pageable
+    ) {
         Pageable safePageable = voucherQueryService.validateSortFields(pageable);
-        return ResponseEntity.ok(voucherQueryService.getVoucherList(safePageable));
+        return ResponseEntity.ok(voucherQueryService.searchVouchers(condition, safePageable));
     }
 }
