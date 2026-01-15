@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.hr.payroll.controller;
 
+import com.erp.erp_accounting.hr.payroll.dto.query.PayrollSearchCondition;
+import com.erp.erp_accounting.hr.payroll.dto.response.PayrollListResponse;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
 import com.erp.erp_accounting.hr.payroll.service.PayrollQueryService;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
@@ -9,8 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/payrolls")
@@ -30,11 +30,11 @@ public class PayrollQueryController {
 
     // 목록 조회
     @GetMapping
-    public ResponseEntity<Page<PayrollResponse>> getPayrollList(
+    public ResponseEntity<Page<PayrollListResponse>> getPayrollList(
             @AuthenticationPrincipal UserPrincipal principal,
-            Pageable pageable
+            @ModelAttribute PayrollSearchCondition condition, Pageable pageable
     ) {
         Pageable safePageable = payrollQueryService.validateSortFields(pageable);
-        return ResponseEntity.ok(payrollQueryService.getPayrollList(principal, safePageable));
+        return ResponseEntity.ok(payrollQueryService.searchPayrolls(principal, condition, safePageable));
     }
 }

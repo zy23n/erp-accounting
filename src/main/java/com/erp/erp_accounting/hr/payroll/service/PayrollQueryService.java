@@ -2,8 +2,11 @@ package com.erp.erp_accounting.hr.payroll.service;
 
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
+import com.erp.erp_accounting.hr.payroll.dto.query.PayrollSearchCondition;
+import com.erp.erp_accounting.hr.payroll.dto.response.PayrollListResponse;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
+import com.erp.erp_accounting.hr.payroll.repository.PayrollQueryRepository;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
 import com.erp.erp_accounting.user.entity.UserRole;
@@ -17,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -26,6 +28,7 @@ import java.util.Set;
 public class PayrollQueryService {
 
     private final PayrollRepository payrollRepository;
+    private final PayrollQueryRepository payrollQueryRepository;
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "payMonth", "baseSalary", "netAmount", "status", "createdAt"
@@ -61,18 +64,15 @@ public class PayrollQueryService {
     }
 
     // 급여 목록 조회 (전체)
-    public Page<PayrollResponse> getPayrollList(UserPrincipal principal, Pageable pageable) {
+    public Page<PayrollListResponse> searchPayrolls(UserPrincipal principal, PayrollSearchCondition condition, Pageable pageable) {
 
-        Page<Payroll> payrolls;
+        validateCondition(condition);
 
         // HR / ADMIN → 전체 조회, USER → 본인 급여만
         if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {
-            payrolls = payrollRepository.findPayrollList(pageable);
-        } else {
-            payrolls = payrollRepository.findAllByEmployeeId(principal.getId(), pageable);
+            return payrollQueryRepository.search(condition, pageable);
         }
-
-        return payrolls.map(this::toResponse);
+        return payrollQueryRepository.searchByEmployee(principal.getId(), condition, pageable);
     }
 
     private PayrollResponse toResponse(Payroll payroll) {
@@ -87,6 +87,22 @@ public class PayrollQueryService {
                 payroll.getNetAmount(),
                 payroll.getStatus()
         );
+    }
+
+    private void validateCondition(PayrollSearchCondition cond) {
+        if (cond.getPayMonth() != null && (cond.getStartPayMonth() != null || cond.getEndPayMonth() != null)) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "payMonth와 startPayMonth/endPayMonth는 동시에 사용할 수 없습니다.");
+        }
+
+        if (cond.getStartPayMonth() != null && cond.getEndPayMonth() != null &&
+                cond.getStartPayMonth().isAfter(cond.getEndPayMonth())) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "startPayMonth는 endPayMonth보다 이후일 수 없습니다.");
+        }
+
+        if (cond.getStartHireDate() != null && cond.getEndHireDate() != null &&
+                cond.getStartHireDate().isAfter(cond.getEndHireDate())) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "startHireDate는 endHireDate보다 이후일 수 없습니다.");
+        }
     }
 }
 
