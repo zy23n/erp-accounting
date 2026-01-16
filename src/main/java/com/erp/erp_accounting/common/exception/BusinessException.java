@@ -18,7 +18,7 @@ public class BusinessException extends RuntimeException {
 
     // 상세 메시지
     public BusinessException(ErrorCode errorCode, String detailMessage) {
-        super(detailMessage);
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
         this.detailMessage = detailMessage;
     }
