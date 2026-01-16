@@ -92,6 +92,27 @@ public class VoucherService {
             throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
 
+        for (VoucherLineRequest line : request.getLines()) {
+            if (line.getAmount() == null) {
+                throw new BusinessException(ErrorCode.INVALID_REQUEST, "금액은 필수입니다.");
+            }
+
+            if (line.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new BusinessException(ErrorCode.INVALID_REQUEST, "전표 라인 금액은 0보다 커야 합니다.");
+            }
+
+            if (line.getType() == null) {
+                throw new BusinessException(ErrorCode.INVALID_REQUEST, "차변/대변 타입은 필수입니다.");
+            }
+        }
+
+        boolean hasDebit = request.getLines().stream().anyMatch(l -> l.getType() == LineType.DEBIT);
+        boolean hasCredit = request.getLines().stream().anyMatch(l -> l.getType() == LineType.CREDIT);
+
+        if (!hasDebit || !hasCredit) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "차변과 대변은 각각 최소 1줄 이상 필요합니다.");
+        }
+
         // 대차검증
         BigDecimal debitSum = request.getLines().stream()
                 .filter(line -> line.getType() == LineType.DEBIT)

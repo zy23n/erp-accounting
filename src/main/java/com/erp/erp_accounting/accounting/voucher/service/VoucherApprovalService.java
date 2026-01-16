@@ -9,7 +9,6 @@ import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,7 @@ public class VoucherApprovalService {
         Voucher voucher = findVoucher(voucherId);
 
         if (!approver.getRoles().contains(UserRole.ACCOUNTING)) {
-            throw new AccessDeniedException("회계 담당자만 전표 승인 가능");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "회계 담당자만 전표 승인 가능");
         }
 
         assertPeriodOpen(voucher);
@@ -43,7 +42,7 @@ public class VoucherApprovalService {
         Voucher voucher = findVoucher(voucherId);
 
         if (!approver.getRoles().contains(UserRole.ACCOUNTING)) {
-            throw new AccessDeniedException("회계 담당자만 전표 반려 가능");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "회계 담당자만 전표 반려 가능");
         }
 
         assertPeriodOpen(voucher);
