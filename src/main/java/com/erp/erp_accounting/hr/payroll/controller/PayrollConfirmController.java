@@ -2,6 +2,7 @@ package com.erp.erp_accounting.hr.payroll.controller;
 
 import com.erp.erp_accounting.hr.payroll.service.PayrollConfirmService;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +20,7 @@ public class PayrollConfirmController {
 
     // 급여 확정 생성
     @PostMapping
-    public ResponseEntity<Long> createConfirm(@RequestParam("payMonth") String payMonth) {
+    public ResponseEntity<Long> createConfirm(@RequestParam("payMonth") @NotNull String payMonth) {
         YearMonth ym = YearMonth.parse(payMonth); // "2025-12"
         return ResponseEntity.ok(payrollConfirmService.createConfirm(ym));
     }

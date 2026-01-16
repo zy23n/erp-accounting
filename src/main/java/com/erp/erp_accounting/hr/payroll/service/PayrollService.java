@@ -8,9 +8,11 @@ import com.erp.erp_accounting.hr.payroll.dto.request.PayrollCreateRequest;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,12 +22,18 @@ public class PayrollService {
     private final EmployeeRepository employeeRepository;
 
     public Long createPayroll(PayrollCreateRequest request) {
+
+        log.info("급여 생성 요청: employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
+
         Employee employee = employeeRepository.findById(request.getEmployeeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         boolean exists = payrollRepository.existsByEmployee_IdAndPayMonth(request.getEmployeeId(), request.getPayMonth());
 
-        if (exists) throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+        if (exists) {
+            log.warn("이미 존재하는 급여: employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+        }
 
         Payroll payroll = Payroll.builder()
                 .employee(employee)
@@ -37,6 +45,8 @@ public class PayrollService {
 
         payroll.calculateNetAmount();
         payrollRepository.save(payroll);
+
+        log.info("급여 생성 완료: payrollId={}", payroll.getId());
         return payroll.getId();
     }
 }

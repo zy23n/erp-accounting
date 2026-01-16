@@ -14,12 +14,14 @@ import com.erp.erp_accounting.hr.payroll.repository.PayrollConfirmRepository;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -34,24 +36,30 @@ public class PayrollConfirmService {
     // 급여 확정 생성
     public Long createConfirm(YearMonth payMonth) {
 
+        log.info("급여 확정 생성 요청: payMonth={}", payMonth);
+
         assertPayrollPeriodOpen(payMonth);
 
         if (payrollConfirmRepository.existsByPayMonth(payMonth)) {
+            log.warn("이미 존재하는 급여 확정: payMonth={}", payMonth);
             throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
         }
 
         getCalculatedPayrolls(payMonth); // 해당 월의 계산 완료된 급여 유무 검증
 
-        PayrollConfirm confirm = PayrollConfirm.builder()
-                .payMonth(payMonth)
-                .build();
-
+        PayrollConfirm confirm = PayrollConfirm.builder().payMonth(payMonth).build();
         payrollConfirmRepository.save(confirm);
+
+        log.info("급여 확정 생성 완료: payrollConfirmId={}", confirm.getId());
+
         return confirm.getId();
     }
 
     // 급여 확정 처리 (최초 확정 + 재확정 공용)
     public void confirm(Long payrollConfirmId, User confirmer) {
+
+        log.info("급여 확정 처리 요청: payrollConfirmId={}, user={}", payrollConfirmId, confirmer.getUsername());
+
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
         accountingPeriodService.assertPreviousPeriodClosed(confirm.getPayMonth());
@@ -59,6 +67,7 @@ public class PayrollConfirmService {
 
         // 이미 확정된 상태면 재확정 불가
         if (confirm.getStatus() == PayrollConfirmStatus.CONFIRMED) {
+            log.warn("이미 확정된 급여: payrollConfirmId={}", payrollConfirmId);
             throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
@@ -72,10 +81,15 @@ public class PayrollConfirmService {
         // 급여 확정 + 자동분개
         confirm.confirm(confirmer);
         autoVoucherService.createFromPayrollConfirm(confirm);
+
+        log.info("급여 확정 완료: payrollConfirmId={}", payrollConfirmId);
     }
 
     // 급여 확정 취소
     public void cancel(Long payrollConfirmId, User canceler) {
+
+        log.info("급여 확정 취소 요청: payrollConfirmId={}, user={}", payrollConfirmId, canceler.getUsername());
+
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
         assertPayrollPeriodOpen(confirm.getPayMonth());
@@ -85,6 +99,8 @@ public class PayrollConfirmService {
 
         // 급여 확정 취소
         confirm.cancel(canceler);
+
+        log.info("급여 확정 취소 요청: payrollConfirmId={}, user={}", payrollConfirmId, canceler.getUsername());
     }
 
     private PayrollConfirm findConfirm(Long id) {
