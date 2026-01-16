@@ -1,9 +1,11 @@
 package com.erp.erp_accounting.security.config;
 
+import com.erp.erp_accounting.common.exception.ErrorResponse;
 import com.erp.erp_accounting.security.jwt.JwtAuthenticationFilter;
 import com.erp.erp_accounting.security.jwt.JwtExceptionHandlerFilter;
 import com.erp.erp_accounting.security.jwt.JwtTokenProvider;
 import com.erp.erp_accounting.security.service.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
 
 @Configuration
 @RequiredArgsConstructor
@@ -105,31 +109,28 @@ public class SecurityConfig {
 
                 // 예외처리
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            authException.printStackTrace();
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setCharacterEncoding("UTF-8");
-                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            response.getWriter().write("""
-                                        {
-                                          "status": 401,
-                                          "message": "%s"
-                                        }
-                                    """.formatted(authException.getMessage()));
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setCharacterEncoding("UTF-8");
-                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            response.getWriter().write("""
-                                        {
-                                          "status": 403,
-                                          "message": "%s"
-                                        }
-                                    """.formatted(accessDeniedException.getMessage()));
-                        })
+                        .authenticationEntryPoint((request, response, authException) ->
+                                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "인증 실패"))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "권한 없음"))
                 );
 
         return http.build();
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                status == 401 ? "UNAUTHORIZED" : "FORBIDDEN",
+                message,
+                null
+        );
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        response.getWriter().flush();
     }
 }

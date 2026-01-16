@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.security.jwt;
 
+import com.erp.erp_accounting.common.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -8,12 +9,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 public class JwtExceptionHandlerFilter extends OncePerRequestFilter {
 
@@ -26,29 +24,26 @@ public class JwtExceptionHandlerFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            sendErrorResponse(response, request, HttpServletResponse.SC_UNAUTHORIZED, "토큰 만료");
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰 만료");
         } catch (JwtException | IllegalArgumentException e) {
-            sendErrorResponse(response, request, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰");
-        } catch (AuthenticationException e) {
-            sendErrorResponse(response, request, HttpServletResponse.SC_UNAUTHORIZED, "인증 실패");
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰");
         }
+
     }
 
-    private void sendErrorResponse(HttpServletResponse response, HttpServletRequest request,
-                                   int status, String message) throws IOException {
+    private void sendError(HttpServletResponse response, int status, String message) throws IOException {
 
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
 
-        Map<String, Object> body = Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", status,
-                "error", "Unauthorized",
-                "message", message,
-                "path", request.getRequestURI()
+        ErrorResponse errorResponse = new ErrorResponse(
+                status == 401 ? "UNAUTHORIZED" : "FORBIDDEN",
+                message,
+                null
         );
 
-        response.getWriter().write(objectMapper.writeValueAsString(body));
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         response.getWriter().flush();
     }
 }
