@@ -9,11 +9,13 @@ import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -34,6 +36,8 @@ public class VoucherApprovalService {
 
         voucher.approve(approver);
 
+        log.info("[VOUCHER_APPROVED] voucherId={}, approverId={}", voucherId, approver.getId());
+
         return toResponse(voucher);
     }
 
@@ -48,6 +52,8 @@ public class VoucherApprovalService {
         assertPeriodOpen(voucher);
 
         voucher.reject(approver);
+
+        log.info("[VOUCHER_REJECTED] voucherId={}, approverId={}", voucherId, approver.getId());
 
         return toResponse(voucher);
     }

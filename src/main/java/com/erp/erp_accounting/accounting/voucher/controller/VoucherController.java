@@ -4,6 +4,7 @@ import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateReques
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherService;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +19,7 @@ public class VoucherController {
 
     @PostMapping
     public ResponseEntity<Long> createVoucher(
-            @RequestBody VoucherCreateRequest request,
+            @RequestBody @Valid VoucherCreateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
         Voucher voucher = voucherService.createVoucher(request, principal.getUser());

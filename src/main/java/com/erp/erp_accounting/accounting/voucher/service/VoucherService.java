@@ -11,6 +11,7 @@ import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -61,6 +63,8 @@ public class VoucherService {
         // 저장
         voucherRepository.save(voucher);
 
+        log.info("[VOUCHER_CREATED] voucherId={}, voucherNo={}, userId={}", voucher.getId(), voucher.getVoucherNo(), user.getId());
+
         return voucher;
     }
 
@@ -81,6 +85,8 @@ public class VoucherService {
                 voucher.cancel(canceler);
             }
         }
+
+        log.warn("[AUTO_VOUCHER_CANCELED] sourceType={}, sourceId={}, cancelerId={}", sourceType, sourceId, canceler.getId());
     }
 
     private void assertVoucherPeriodOpen(LocalDate voucherDate) {
