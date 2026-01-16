@@ -66,7 +66,15 @@ public class Payroll extends BaseEntity {
         if (baseSalary == null || allowanceAmount == null || deductionAmount == null) {
             throw new BusinessException(ErrorCode.INVALID_STATE);
         }
+
+        if (baseSalary.signum() < 0 || allowanceAmount.signum() < 0 || deductionAmount.signum() < 0) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
         this.netAmount = baseSalary.add(allowanceAmount).subtract(deductionAmount);
+
+        if (this.netAmount.signum() < 0) throw new BusinessException(ErrorCode.INVALID_STATE);
+
         this.status = PayrollStatus.CALCULATED;
     }
 

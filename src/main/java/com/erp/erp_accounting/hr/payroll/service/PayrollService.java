@@ -23,11 +23,7 @@ public class PayrollService {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        boolean exists = payrollRepository
-                .existsByEmployee_IdAndPayMonth(
-                        request.getEmployeeId(),
-                        request.getPayMonth()
-                );
+        boolean exists = payrollRepository.existsByEmployee_IdAndPayMonth(request.getEmployeeId(), request.getPayMonth());
 
         if (exists) throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
 
