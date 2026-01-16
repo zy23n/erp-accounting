@@ -14,6 +14,10 @@ public enum ErrorCode {
     DUPLICATE_RESOURCE("COMMON_409", HttpStatus.CONFLICT, "이미 존재하는 데이터입니다."),
     INTERNAL_SERVER_ERROR("COMMON_500", HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
 
+    // ===== AUTH =====
+    UNAUTHORIZED("AUTH_401", HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+    FORBIDDEN("AUTH_403", HttpStatus.FORBIDDEN, "권한이 없습니다."),
+
     // ===== STATE =====
     INVALID_STATE("STATE_400", HttpStatus.BAD_REQUEST, "현재 상태에서는 해당 작업을 수행할 수 없습니다."),
 
