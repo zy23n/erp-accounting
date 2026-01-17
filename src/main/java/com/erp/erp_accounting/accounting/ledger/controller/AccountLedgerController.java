@@ -3,16 +3,13 @@ package com.erp.erp_accounting.accounting.ledger.controller;
 import com.erp.erp_accounting.accounting.ledger.dto.request.AccountLedgerRequest;
 import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerResponse;
 import com.erp.erp_accounting.accounting.ledger.service.AccountLedgerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/ledger")
 @RequiredArgsConstructor
@@ -22,11 +19,16 @@ public class AccountLedgerController {
 
     @GetMapping("/account")
     public ResponseEntity<AccountLedgerResponse> getAccountLedger(
-            @RequestParam("accountId") Long accountId,
-            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @Valid @ModelAttribute AccountLedgerRequest request
     ) {
-        AccountLedgerRequest request = new AccountLedgerRequest(accountId, startDate, endDate);
-        return ResponseEntity.ok(accountLedgerService.getAccountLedger(request));
+        log.info("AccountLedger 조회 요청: accountId={}, startDate={}, endDate={}",
+                request.getAccountId(), request.getStartDate(), request.getEndDate());
+
+        AccountLedgerResponse response = accountLedgerService.getAccountLedger(request);
+
+        log.info("AccountLedger 조회 완료: openingBalance={}, closingBalance={}, rows={}",
+                response.getOpeningBalance(), response.getClosingBalance(), response.getItems().size());
+
+        return ResponseEntity.ok(response);
     }
 }
