@@ -3,16 +3,13 @@ package com.erp.erp_accounting.accounting.ledger.controller;
 import com.erp.erp_accounting.accounting.ledger.dto.request.MonthlyAccountBalanceRequest;
 import com.erp.erp_accounting.accounting.ledger.dto.response.MonthlyAccountBalanceResponse;
 import com.erp.erp_accounting.accounting.ledger.service.MonthlyAccountBalanceService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.YearMonth;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/ledger")
 @RequiredArgsConstructor
@@ -22,10 +19,16 @@ public class MonthlyAccountBalanceController {
 
     @GetMapping("/monthly")
     public ResponseEntity<MonthlyAccountBalanceResponse> getMonthlyAccountBalance(
-            @RequestParam("accountId") Long accountId,
-            @RequestParam("month") @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
+            @Valid @ModelAttribute MonthlyAccountBalanceRequest request
     ) {
-        MonthlyAccountBalanceRequest request = new MonthlyAccountBalanceRequest(accountId, month);
-        return ResponseEntity.ok(monthlyAccountBalanceService.getMonthlyBalance(request));
+        log.info("MonthlyAccountBalance 조회 요청: accountId={}, month={}", request.getAccountId(), request.getMonth());
+
+        MonthlyAccountBalanceResponse response = monthlyAccountBalanceService.getMonthlyBalance(request);
+
+        log.info("MonthlyAccountBalance 조회 완료: opening={}, debit={}, credit={}, closing={}",
+                response.getOpeningBalance(), response.getTotalDebit(),
+                response.getTotalCredit(), response.getClosingBalance());
+
+        return ResponseEntity.ok(response);
     }
 }
