@@ -11,6 +11,7 @@ import com.erp.erp_accounting.security.principal.UserPrincipal;
 import com.erp.erp_accounting.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -42,6 +44,8 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        log.info("Login success: userId={}", principal.getUser().getId());
+
         String accessToken = tokenProvider.generateAccessToken(principal);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(principal.getUser());;
         String username = principal.getUsername();
@@ -54,12 +58,13 @@ public class AuthController {
 
     // Refresh Token으로 Access Token 재발급
     @PostMapping("/refresh")
-    public ResponseEntity<RefreshTokenResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<RefreshTokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
 
         // Refresh Token 검증
         RefreshToken refreshToken = refreshTokenService.validateRefreshToken(request.getRefreshToken());
 
         User user = refreshToken.getUser();
+        log.info("Refresh token issued: userId={}", user.getId());
         UserPrincipal principal = new UserPrincipal(user);
 
         // 새로운 Access Token 발급
@@ -70,9 +75,10 @@ public class AuthController {
 
     // 로그아웃: 특정 Refresh Token 삭제
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request,
+    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequest request,
                                     @AuthenticationPrincipal UserPrincipal principal) {
         refreshTokenService.logout(request.getRefreshToken(), principal.getUser());
+        log.info("Logout: userId={}", principal.getUser().getId());
         return ResponseEntity.ok(Map.of("message", "로그아웃 완료"));
     }
 
@@ -80,6 +86,7 @@ public class AuthController {
     @PostMapping("/logout/all")
     public ResponseEntity<?> logoutAll(@AuthenticationPrincipal UserPrincipal principal) {
         refreshTokenService.deleteAllByUser(principal.getUser());
+        log.info("Logout all sessions: userId={}", principal.getUser().getId());
         return ResponseEntity.ok(Map.of("message", "모든 기기 로그아웃 완료"));
     }
 }
