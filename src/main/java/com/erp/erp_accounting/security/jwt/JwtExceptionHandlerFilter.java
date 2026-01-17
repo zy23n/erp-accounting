@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.security.jwt;
 
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.common.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,24 +26,19 @@ public class JwtExceptionHandlerFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰 만료");
+            writeErrorResponse(response, ErrorCode.UNAUTHORIZED, "토큰 만료");
         } catch (JwtException | IllegalArgumentException e) {
-            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰");
+            writeErrorResponse(response, ErrorCode.UNAUTHORIZED, "유효하지 않은 토큰");
         }
 
     }
 
-    private void sendError(HttpServletResponse response, int status, String message) throws IOException {
-
-        response.setStatus(status);
+    private void writeErrorResponse(HttpServletResponse response, ErrorCode errorCode, String detailMessage) throws IOException {
+        response.setStatus(errorCode.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                status == 401 ? "UNAUTHORIZED" : "FORBIDDEN",
-                message,
-                null
-        );
+        ErrorResponse errorResponse = ErrorResponse.from(new BusinessException(errorCode, detailMessage));
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         response.getWriter().flush();

@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.security.config;
 
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.common.exception.ErrorResponse;
 import com.erp.erp_accounting.security.jwt.JwtAuthenticationFilter;
 import com.erp.erp_accounting.security.jwt.JwtExceptionHandlerFilter;
@@ -30,6 +32,7 @@ import java.io.IOException;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -110,26 +113,21 @@ public class SecurityConfig {
                 // 예외처리
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->
-                                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "인증 실패"))
+                                writeErrorResponse(response, ErrorCode.UNAUTHORIZED, "인증 실패"))
                         .accessDeniedHandler((request, response, accessDeniedException) ->
-                                writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "권한 없음"))
+                                writeErrorResponse(response, ErrorCode.FORBIDDEN, "권한 없음"))
                 );
 
         return http.build();
     }
 
-    private void writeErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
-        response.setStatus(status);
+    private void writeErrorResponse(HttpServletResponse response, ErrorCode errorCode, String detailMessage) throws IOException {
+        response.setStatus(errorCode.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                status == 401 ? "UNAUTHORIZED" : "FORBIDDEN",
-                message,
-                null
-        );
+        ErrorResponse errorResponse = ErrorResponse.from(new BusinessException(errorCode, detailMessage));
 
-        ObjectMapper objectMapper = new ObjectMapper();
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         response.getWriter().flush();
     }

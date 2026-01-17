@@ -1,19 +1,16 @@
 package com.erp.erp_accounting.common.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // 비즈니스 예외
     @ExceptionHandler(BusinessException.class)
@@ -28,16 +25,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
 
-        String message = e.getBindingResult().getFieldErrors()
-                .stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .collect(Collectors.joining(", "));
+        List<FieldErrorResponse> errors =
+                e.getBindingResult().getFieldErrors()
+                        .stream()
+                        .map(err -> new FieldErrorResponse(err.getField(), err.getRejectedValue(), err.getDefaultMessage()))
+                        .toList();
 
-        log.warn("ValidationException 발생: {}", message, e);
+        log.warn("ValidationException 발생: {}", errors);
 
-        ErrorResponse response = new ErrorResponse("VALIDATION_ERROR", "요청 파라미터 검증 실패", message);
-
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus()).body(ErrorResponse.validation(errors));
     }
 
     // 나머지 모든 예외
@@ -49,9 +45,10 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(
                 ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
                 ErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
-                e.getMessage()
+                null,
+                null
         );
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus()).body(response);
     }
 }
