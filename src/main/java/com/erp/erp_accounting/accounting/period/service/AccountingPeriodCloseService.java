@@ -13,6 +13,7 @@ import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +21,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -71,6 +72,8 @@ public class AccountingPeriodCloseService {
         // 회계기간 상태 변경
         accountingPeriodService.close(period, closer);
 
+        log.info("[PERIOD_CLOSED] period={}, closedBy={}, snapshotCount={}", period, closer.getId(), balances.size());
+
         return toResponse(accountingPeriod);
     }
 
@@ -84,6 +87,8 @@ public class AccountingPeriodCloseService {
         accountingPeriodService.reopen(period, reopener);
 
         AccountingPeriod reopenedPeriod = accountingPeriodService.getByPeriod(period);
+
+        log.info("[PERIOD_REOPENED] period={}, reopenedBy={}", period, reopener.getId());
 
         return toResponse(reopenedPeriod);
     }
