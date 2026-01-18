@@ -42,7 +42,7 @@ public class AccountingPeriodCloseService {
 
         // 마감 가능 여부 검증
         accountingPeriodService.assertPreviousPeriodClosed(period);
-        AccountingPeriod accountingPeriod = accountingPeriodService.getClosablePeriodOrThrow(period);
+        AccountingPeriod accountingPeriod = accountingPeriodService.getPeriodForClosing(period);
 
         // 마감 대상 계정 조회 (말단 계정만)
         List<Account> leafAccounts = accountRepository.findLeafAccounts();

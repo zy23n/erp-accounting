@@ -27,9 +27,9 @@ public class AccountingPeriodService {
     }
 
     // 마감 가능한 회계기간 조회
-    public AccountingPeriod getClosablePeriodOrThrow(YearMonth period) {
+    public AccountingPeriod getPeriodForClosing(YearMonth period) {
         AccountingPeriod accountingPeriod = getByPeriod(period);
-        validator.assertClosable(accountingPeriod);
+        validator.assertNotClosed(accountingPeriod);
         return accountingPeriod;
     }
 
@@ -72,20 +72,20 @@ public class AccountingPeriodService {
     // 마감 여부 검증 (전표/급여 확정 공용)
     public void assertPeriodOpen(YearMonth period) {
         AccountingPeriod accountingPeriod = getByPeriod(period);
-        validator.assertPeriodOpen(accountingPeriod);
+        validator.assertNotClosed(accountingPeriod);
     }
 
     @Transactional
     public void close(YearMonth period, User closer) {
         AccountingPeriod accountingPeriod = getByPeriod(period);
-        validator.assertClosable(accountingPeriod);
+        validator.assertNotClosed(accountingPeriod);
         accountingPeriod.close(closer);
     }
 
     @Transactional
     public void reopen(YearMonth period, User reopener) {
         AccountingPeriod accountingPeriod = getByPeriod(period);
-        validator.assertReopenable(accountingPeriod);
+        validator.assertCanReopen(accountingPeriod);
         accountingPeriod.reopen(reopener);
     }
 }

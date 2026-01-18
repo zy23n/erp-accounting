@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AccountingPeriodValidator {
 
-    // 마감 가능 여부 검증
-    public void assertClosable(AccountingPeriod period) {
+    // 마감/전표/급여 등 처리 가능 여부 검증
+    public void assertNotClosed(AccountingPeriod period) {
         if (period.isClosed()) {
             throw new BusinessException(ErrorCode.PERIOD_ALREADY_CLOSED,
                     String.format("이미 마감된 회계기간 (period=%s)", period.getPeriod()));
@@ -19,18 +19,10 @@ public class AccountingPeriodValidator {
     }
 
     // 재마감 가능 여부 검증
-    public void assertReopenable(AccountingPeriod period) {
+    public void assertCanReopen(AccountingPeriod period) {
         if (!period.isClosed()) {
             throw new BusinessException(ErrorCode.PERIOD_NOT_CLOSED,
                     String.format("아직 마감되지 않은 회계기간 (period=%s)", period.getPeriod()));
-        }
-    }
-
-    // 전표 입력/승인 등 마감 여부 검증
-    public void assertPeriodOpen(AccountingPeriod period) {
-        if (period.isClosed()) {
-            throw new BusinessException(ErrorCode.PERIOD_ALREADY_CLOSED,
-                    String.format("이미 마감된 회계기간 (period=%s)", period.getPeriod()));
         }
     }
 }
