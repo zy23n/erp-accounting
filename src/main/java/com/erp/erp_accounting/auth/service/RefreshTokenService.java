@@ -42,10 +42,10 @@ public class RefreshTokenService {
     public RefreshToken validateRefreshToken(String token) {
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Refresh Token 미존재"));
 
         if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_STATE, "RefreshToken 만료");
         }
 
         return refreshToken;
@@ -53,11 +53,12 @@ public class RefreshTokenService {
 
     // 특정 Refresh Token 삭제
     public void logout(String refreshToken, User user) {
+
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Refresh Token 미존재"));
 
         if (!token.getUser().getId().equals(user.getId())) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "Refresh Token 소유자 불일치");
         }
 
         refreshTokenRepository.delete(token);

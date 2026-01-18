@@ -65,11 +65,12 @@ public class AccountService {
             case BONUS -> code = "1020";
             case DEDUCTION -> code = "2010";
             case CASH -> code = "1011";
-            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST);
+            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST, "지원하지 않는 급여 항목");
         }
 
         return accountRepository.findByCode(code)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND))
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("급여 항목-계정 매핑 정보 미존재 (item=%s, code=%s)", item, code)))
                 .getId();
     }
 }

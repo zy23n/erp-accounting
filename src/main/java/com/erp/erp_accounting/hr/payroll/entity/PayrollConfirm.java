@@ -49,19 +49,20 @@ public class PayrollConfirm extends BaseEntity {
 
     public void addPayroll(Payroll payroll) {
         if (this.status == PayrollConfirmStatus.CONFIRMED) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_STATE, "급여 확정 완료 상태");
         }
 
         if (payroll.getPayrollConfirm() != null) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_STATE, "급여 확정 중복 포함");
         }
 
         if (!this.payMonth.equals(payroll.getPayMonth())) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_STATE,
+                    String.format("급여 월 불일치 (confirmMonth=%s, payrollMonth=%s)", this.payMonth, payroll.getPayMonth()));
         }
 
         if (payroll.getStatus() != PayrollStatus.CALCULATED) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_STATE, "급여 상태 불일치 (required=CALCULATED)");
         }
 
         payrolls.add(payroll);
@@ -82,7 +83,8 @@ public class PayrollConfirm extends BaseEntity {
     // 확정 (최초 확정 + 재확정 공용)
     public void confirm(User confirmer) {
         if (this.status == PayrollConfirmStatus.CONFIRMED) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_STATE,
+                    String.format("급여 확정 완료 상태 (payMonth=%s, confirmId=%d)", payMonth, id));
         }
 
         this.status = PayrollConfirmStatus.CONFIRMED;
@@ -95,7 +97,7 @@ public class PayrollConfirm extends BaseEntity {
     // 확정 취소
     public void cancel(User canceler) {
         if (this.status != PayrollConfirmStatus.CONFIRMED) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_STATE, "급여 확정 취소 불가 상태 (required=CONFIRMED)");
         }
 
         this.status = PayrollConfirmStatus.CANCELED;

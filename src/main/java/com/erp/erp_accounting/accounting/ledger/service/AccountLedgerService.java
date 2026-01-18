@@ -12,7 +12,6 @@ import com.erp.erp_accounting.accounting.ledger.repository.VoucherLineRepository
 import com.erp.erp_accounting.accounting.common.BalanceCalculator;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +33,9 @@ public class AccountLedgerService {
 
     public AccountLedgerResponse getAccountLedger(AccountLedgerRequest request) {
 
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST);
-        }
-
         Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("계정과목 미존재 (accountId=%d)", request.getAccountId())));
 
         NormalBalance normalBalance = account.getNormalBalance();
 

@@ -16,17 +16,17 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class AccountLedgerRequest {
 
-    @NotNull(message = "계정 ID는 필수입니다.")
+    @NotNull(message = "계정과목 미입력")
     private Long accountId;
 
-    @NotNull(message = "조회 시작일은 필수입니다.")
-    @PastOrPresent(message = "조회 시작일은 과거 또는 오늘이어야 합니다.")
+    @NotNull(message = "조회 시작일 미입력")
+    @PastOrPresent(message = "조회 시작일 범위 오류")
     private LocalDate startDate;
 
-    @NotNull(message = "조회 종료일은 필수입니다.")
+    @NotNull(message = "조회 종료일 미입력")
     private LocalDate endDate;
 
-    @AssertTrue(message = "조회 종료일은 조회 시작일 이후여야 합니다.")
+    @AssertTrue(message = "조회 기간 범위 오류")
     public boolean isValidPeriod() {
         if (startDate == null || endDate == null) return true;
         return !endDate.isBefore(startDate);

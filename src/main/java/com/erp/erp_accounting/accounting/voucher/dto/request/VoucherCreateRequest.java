@@ -16,13 +16,13 @@ import java.util.List;
 @AllArgsConstructor
 public class VoucherCreateRequest {
 
-    @NotNull(message = "전표일자는 필수입니다.")
+    @NotNull(message = "전표일자 미입력")
     private LocalDate voucherDate;
 
-    @Size(max = 500)
+    @Size(max = 500, message = "적요 길이 초과")
     private String description;
 
-    @NotEmpty(message = "전표 라인은 최소 1개 이상 필요합니다.")
+    @NotEmpty(message = "전표 라인 미존재")
     @Valid
     private List<VoucherLineRequest> lines;
 

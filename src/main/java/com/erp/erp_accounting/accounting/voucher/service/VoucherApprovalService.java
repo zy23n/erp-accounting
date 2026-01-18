@@ -29,7 +29,7 @@ public class VoucherApprovalService {
         Voucher voucher = findVoucher(voucherId);
 
         if (!approver.getRoles().contains(UserRole.ACCOUNTING)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "회계 담당자만 전표 승인 가능");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "전표 승인 권한 없음");
         }
 
         assertPeriodOpen(voucher);
@@ -46,7 +46,7 @@ public class VoucherApprovalService {
         Voucher voucher = findVoucher(voucherId);
 
         if (!approver.getRoles().contains(UserRole.ACCOUNTING)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "회계 담당자만 전표 반려 가능");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "전표 반려 권한 없음");
         }
 
         assertPeriodOpen(voucher);
@@ -60,7 +60,8 @@ public class VoucherApprovalService {
 
     private Voucher findVoucher(Long voucherId) {
         return voucherRepository.findById(voucherId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("전표 미존재 (voucherId=%d)", voucherId)));
     }
 
     private void assertPeriodOpen(Voucher voucher) {

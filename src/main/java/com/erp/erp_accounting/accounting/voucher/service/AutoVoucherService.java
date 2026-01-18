@@ -35,7 +35,9 @@ public class AutoVoucherService {
         boolean existsActiveVoucher =
                 voucherRepository.existsBySourceTypeAndSourceIdAndStatusNot(
                     SourceType.PAYROLL, confirm.getId(), VoucherStatus.CANCELED);
-        if (existsActiveVoucher) throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+        if (existsActiveVoucher) {
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE, "급여 확정 전표 중복 생성");
+        }
 
         List<VoucherLineRequest> lines = new ArrayList<>();
 

@@ -22,7 +22,8 @@ public class AccountingPeriodService {
     // 특정 회계기간 조회
     public AccountingPeriod getByPeriod(YearMonth period) {
         return accountingPeriodRepository.findByPeriod(period)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("회계기간 미존재 (period=%s)", period)));
     }
 
     // 마감 가능한 회계기간 조회
@@ -48,7 +49,8 @@ public class AccountingPeriodService {
 
     public void assertPreviousPeriodClosed(YearMonth period) {
         if (!isPreviousPeriodClosed(period)) {
-            throw new BusinessException(ErrorCode.PERIOD_NOT_CLOSED);
+            throw new BusinessException(ErrorCode.PERIOD_NOT_CLOSED,
+                    String.format("이전 회계기간 미마감 (period=%s)", period.minusMonths(1)));
         }
     }
 

@@ -25,7 +25,8 @@ public class PayrollConfirmQueryService {
     // 단건 조회
     public PayrollConfirmResponse getPayrollConfirm(Long payrollConfirmId) {
         PayrollConfirm confirm = payrollConfirmRepository.findDetailById(payrollConfirmId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("급여 확정 미존재 (confirmId=%d)", payrollConfirmId)));
 
         List<PayrollResponse> payrolls = confirm.getPayrolls().stream()
                 .map(this::toPayrollResponse)

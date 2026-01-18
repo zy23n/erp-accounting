@@ -8,7 +8,6 @@ import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
-import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirmStatus;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollStatus;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollConfirmRepository;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
@@ -42,7 +41,7 @@ public class PayrollConfirmService {
 
         if (payrollConfirmRepository.existsByPayMonth(payMonth)) {
             log.warn("이미 존재하는 급여 확정: payMonth={}", payMonth);
-            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE, String.format("급여 확정 중복 존재 (payMonth=%s)", payMonth));
         }
 
         getCalculatedPayrolls(payMonth); // 해당 월의 계산 완료된 급여 유무 검증
@@ -64,12 +63,6 @@ public class PayrollConfirmService {
 
         accountingPeriodService.assertPreviousPeriodClosed(confirm.getPayMonth());
         assertPayrollPeriodOpen(confirm.getPayMonth());
-
-        // 이미 확정된 상태면 재확정 불가
-        if (confirm.getStatus() == PayrollConfirmStatus.CONFIRMED) {
-            log.warn("이미 확정된 급여: payrollConfirmId={}", payrollConfirmId);
-            throw new BusinessException(ErrorCode.INVALID_STATE);
-        }
 
         // 해당 월의 계산 완료된 급여 조회
         List<Payroll> payrolls = getCalculatedPayrolls(confirm.getPayMonth());
@@ -103,9 +96,10 @@ public class PayrollConfirmService {
         log.info("급여 확정 취소 요청: payrollConfirmId={}, user={}", payrollConfirmId, canceler.getUsername());
     }
 
-    private PayrollConfirm findConfirm(Long id) {
-        return payrollConfirmRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+    private PayrollConfirm findConfirm(Long payrollConfirmId) {
+        return payrollConfirmRepository.findById(payrollConfirmId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("급여 확정 미존재 (confirmId=%d)", payrollConfirmId)));
     }
 
     private void assertPayrollPeriodOpen(YearMonth payMonth) {
@@ -116,7 +110,9 @@ public class PayrollConfirmService {
         List<Payroll> payrolls =
                 payrollRepository.findByPayMonthAndStatus(payMonth, PayrollStatus.CALCULATED);
 
-        if (payrolls.isEmpty()) throw new BusinessException(ErrorCode.INVALID_STATE);
+        if (payrolls.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, String.format("CALCULATED 상태 급여 미존재 (payMonth=%s)", payMonth));
+        }
 
         return payrolls;
     }

@@ -15,18 +15,18 @@ import java.time.YearMonth;
 @AllArgsConstructor
 public class PayrollCreateRequest {
 
-    @NotNull(message = "직원을 선택해주세요.")
+    @NotNull(message = "직원 미입력")
     private Long employeeId;
 
-    @NotNull(message = "급여 월을 선택해주세요.")
+    @NotNull(message = "급여 월 미입력")
     private YearMonth payMonth;
 
-    @NotNull @Positive(message = "기본급은 0보다 커야 합니다.")
+    @NotNull @Positive(message = "기본급 0이하")
     private BigDecimal baseSalary;
 
-    @NotNull @PositiveOrZero(message = "수당은 0 이상이어야 합니다.")
+    @NotNull @PositiveOrZero(message = "수당 음수")
     private BigDecimal allowanceAmount;
 
-    @NotNull @PositiveOrZero(message = "공제액은 0 이상이어야 합니다.")
+    @NotNull @PositiveOrZero(message = "공제액 음수")
     private BigDecimal deductionAmount;
 }

@@ -95,14 +95,18 @@ public class Voucher extends BaseEntity {
 
     // 상태 변경 헬퍼 메서드
     private void assertDraft() {
-        if (this.status != VoucherStatus.DRAFT) throw new BusinessException(ErrorCode.INVALID_STATE);
+        if (this.status != VoucherStatus.DRAFT) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "전표 상태 오류 (required=DRAFT)");
+        }
     }
 
     public void validateBalanced() {
         BigDecimal debitSum = BigDecimal.ZERO;
         BigDecimal creditSum = BigDecimal.ZERO;
 
-        if (lines.isEmpty()) throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        if (lines.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "전표 라인 미존재");
+        }
 
         for (VoucherLine line : lines) {
             BigDecimal amount = line.getAmount();
@@ -114,7 +118,10 @@ public class Voucher extends BaseEntity {
             }
         }
 
-        if (debitSum.compareTo(creditSum) != 0) throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT);
+        if (debitSum.compareTo(creditSum) != 0) {
+            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
+                    String.format("전표 대차 불일치 (전표번호=%s, 차변 합계=%s, 대변 합계=%s)", this.voucherNo, debitSum, creditSum));
+        }
     }
 
     public void approve(User approver) {
@@ -137,7 +144,7 @@ public class Voucher extends BaseEntity {
     }
 
     public void cancel(User canceler) {
-        if (!isCancelable()) throw new BusinessException(ErrorCode.INVALID_STATE);
+        if (!isCancelable()) throw new BusinessException(ErrorCode.INVALID_STATE, "전표 취소 불가 상태 (required=APPROVED)");
 
         this.status = VoucherStatus.CANCELED;
         this.canceledBy = canceler;

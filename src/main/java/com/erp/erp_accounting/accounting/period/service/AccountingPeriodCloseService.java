@@ -123,7 +123,8 @@ public class AccountingPeriodCloseService {
                 .setScale(2, RoundingMode.HALF_UP);
 
         if (totalDebit.compareTo(totalCredit) != 0) {
-            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT);
+            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
+                    String.format("월별 잔액 불일치 (회계기간=%s, 차변 합계=%s, 대변 합계=%s)", period, totalDebit, totalCredit));
         }
     }
 

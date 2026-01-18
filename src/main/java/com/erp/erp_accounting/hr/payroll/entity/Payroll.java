@@ -64,27 +64,33 @@ public class Payroll extends BaseEntity {
     // 총 급여 계산
     public void calculateNetAmount() {
         if (baseSalary == null || allowanceAmount == null || deductionAmount == null) {
-            throw new BusinessException(ErrorCode.INVALID_STATE);
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "급여 항목 금액 누락 (기본급/수당/공제)");
         }
 
         if (baseSalary.signum() < 0 || allowanceAmount.signum() < 0 || deductionAmount.signum() < 0) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "급여 항목 금액 범위 오류 (0 이상)");
         }
 
         this.netAmount = baseSalary.add(allowanceAmount).subtract(deductionAmount);
 
-        if (this.netAmount.signum() < 0) throw new BusinessException(ErrorCode.INVALID_STATE);
+        if (this.netAmount.signum() < 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "총 급여 금액 음수");
+        }
 
         this.status = PayrollStatus.CALCULATED;
     }
 
     public void markConfirmed() {
-        if (this.status != PayrollStatus.CALCULATED) throw new BusinessException(ErrorCode.INVALID_STATE);
+        if (this.status != PayrollStatus.CALCULATED) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "급여 상태 불일치 (required=CALCULATED)");
+        }
         this.status = PayrollStatus.CONFIRMED;
     }
 
     public void rollbackToCalculated() {
-        if (this.status != PayrollStatus.CONFIRMED) throw new BusinessException(ErrorCode.INVALID_STATE);
+        if (this.status != PayrollStatus.CONFIRMED) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "급여 상태 불일치 (required=CONFIRMED)");
+        }
         this.status = PayrollStatus.CALCULATED;
     }
 

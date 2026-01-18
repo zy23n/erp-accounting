@@ -26,13 +26,16 @@ public class PayrollService {
         log.info("급여 생성 요청: employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
 
         Employee employee = employeeRepository.findById(request.getEmployeeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("직원 미존재 (employeeId=%d)", request.getEmployeeId())));
 
         boolean exists = payrollRepository.existsByEmployee_IdAndPayMonth(request.getEmployeeId(), request.getPayMonth());
 
         if (exists) {
             log.warn("이미 존재하는 급여: employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
-            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE,
+                    String.format("급여 중복 존재 (payMonth=%s, employeeId=%d)", request.getPayMonth(), request.getEmployeeId()));
         }
 
         Payroll payroll = Payroll.builder()

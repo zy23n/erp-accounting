@@ -16,14 +16,14 @@ import java.time.YearMonth;
 @AllArgsConstructor
 public class MonthlyAccountBalanceRequest {
 
-    @NotNull(message = "계정 ID는 필수입니다.")
+    @NotNull(message = "계정과목 미입력")
     private Long accountId;
 
-    @NotNull(message = "조회 월은 필수입니다.")
+    @NotNull(message = "조회 월 미입력")
     @DateTimeFormat(pattern = "yyyy-MM")
     private YearMonth month;
 
-    @AssertTrue(message = "조회 월은 현재 월 이후일 수 없습니다.")
+    @AssertTrue(message = "조회 월 초과")
     public boolean isNotFutureMonth() {
         if (month == null) return true;
         return !month.isAfter(YearMonth.now());

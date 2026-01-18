@@ -47,7 +47,8 @@ public class PayrollQueryService {
     // 급여 상세 조회
     public PayrollResponse getPayroll(Long payrollId, UserPrincipal principal) {
         Payroll payroll = payrollRepository.findById(payrollId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("급여 미존재 (payrollId=%d)", payrollId)));
 
         // HR / ADMIN은 전체 조회 가능
         if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {
@@ -56,7 +57,7 @@ public class PayrollQueryService {
 
         // USER는 본인 데이터만 조회 가능
         if (!payroll.getEmployee().getId().equals(principal.getId())) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "본인 급여만 조회 가능합니다.");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "본인 급여만 조회 가능");
         }
 
         return toResponse(payroll);
@@ -90,17 +91,17 @@ public class PayrollQueryService {
 
     private void validateCondition(PayrollSearchCondition cond) {
         if (cond.getPayMonth() != null && (cond.getStartPayMonth() != null || cond.getEndPayMonth() != null)) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "payMonth와 startPayMonth/endPayMonth는 동시에 사용할 수 없습니다.");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "조회 조건 충돌 (payMonth, startPayMonth/endPayMonth)");
         }
 
         if (cond.getStartPayMonth() != null && cond.getEndPayMonth() != null &&
                 cond.getStartPayMonth().isAfter(cond.getEndPayMonth())) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "startPayMonth는 endPayMonth보다 이후일 수 없습니다.");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "급여월 범위 오류 (startPayMonth > endPayMonth)");
         }
 
         if (cond.getStartHireDate() != null && cond.getEndHireDate() != null &&
                 cond.getStartHireDate().isAfter(cond.getEndHireDate())) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "startHireDate는 endHireDate보다 이후일 수 없습니다.");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "입사일 범위 오류 (startHireDate > endHireDate)");
         }
     }
 }

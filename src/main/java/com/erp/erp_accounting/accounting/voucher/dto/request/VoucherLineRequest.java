@@ -14,13 +14,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class VoucherLineRequest {
 
-    @NotNull(message = "계정과목은 필수입니다.")
+    @NotNull(message = "계정과목 미입력")
     private Long accountId;
 
-    @NotNull(message = "차변/대변 타입은 필수입니다.")
+    @NotNull(message = "차변/대변 타입 미입력")
     private LineType type;
 
-    @NotNull(message = "금액은 필수입니다.")
-    @Positive(message = "금액은 0보다 커야 합니다.")
+    @NotNull(message = "금액 미입력")
+    @Positive(message = "금액 0 이하")
     private BigDecimal amount;
 }

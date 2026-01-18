@@ -47,7 +47,8 @@ public class VoucherQueryService {
     // 단건 조회
     public VoucherResponse getVoucher(Long voucherId) {
         Voucher voucher = voucherRepository.findWithLinesById(voucherId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("전표 미존재 (voucherId=%d)", voucherId)));
 
         return toResponse(voucher);
     }
@@ -102,10 +103,10 @@ public class VoucherQueryService {
 
     private void validateCondition(VoucherSearchCondition cond) {
         if (cond.getVoucherDate() != null && (cond.getStartDate() != null || cond.getEndDate() != null)) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "voucherDate와 startDate/endDate는 동시에 사용할 수 없습니다.");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "조회 조건 충돌 (voucherDate, startDate/endDate)");
         }
         if (cond.getStartDate() != null && cond.getEndDate() != null && cond.getStartDate().isAfter(cond.getEndDate())) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "startDate는 endDate보다 이후일 수 없습니다.");
+            throw new BusinessException(ErrorCode.INVALID_REQUEST, "조회 기간 범위 오류 (startDate > endDate)");
         }
     }
 }

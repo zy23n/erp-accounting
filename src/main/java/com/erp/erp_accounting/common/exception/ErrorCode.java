@@ -22,7 +22,7 @@ public enum ErrorCode {
     INVALID_STATE("STATE_400", HttpStatus.BAD_REQUEST, "현재 상태에서는 해당 작업을 수행할 수 없습니다."),
 
     // ===== PERIOD ====
-    PERIOD_NOT_CLOSED("PERIOD_409", HttpStatus.CONFLICT, "이전 회계기간이 마감되지 않았습니다."),
+    PERIOD_NOT_CLOSED("PERIOD_409", HttpStatus.CONFLICT, "회계기간이 마감되지 않았습니다."),
     PERIOD_ALREADY_CLOSED("PERIOD_409_2", HttpStatus.CONFLICT, "이미 마감된 회계기간입니다."),
 
     // ===== ACCOUNTING =====

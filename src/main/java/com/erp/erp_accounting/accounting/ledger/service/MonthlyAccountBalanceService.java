@@ -45,7 +45,9 @@ public class MonthlyAccountBalanceService {
         MonthlyAccountBalance balance =
                 monthlyAccountBalanceRepository
                         .findByPeriodAndAccountId(request.getMonth(), request.getAccountId())
-                        .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                                String.format("월별 잔액 스냅샷 미존재 (period=%s, accountId=%d)",
+                                        request.getMonth(), request.getAccountId())));
 
         return new MonthlyAccountBalanceResponse(
                 balance.getOpeningBalance(),
@@ -59,7 +61,8 @@ public class MonthlyAccountBalanceService {
     private MonthlyAccountBalanceResponse getRealtimeBalance(MonthlyAccountBalanceRequest request) {
 
         Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("계정과목 미존재 (accountId=%d)", request.getAccountId())));
 
         NormalBalance normalBalance = account.getNormalBalance();
 
