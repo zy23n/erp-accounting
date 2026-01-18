@@ -9,6 +9,7 @@ import com.erp.erp_accounting.accounting.balance.repository.MonthlyAccountBalanc
 import com.erp.erp_accounting.accounting.balance.service.MonthlyBalanceCalculationService;
 import com.erp.erp_accounting.accounting.period.dto.response.AccountingPeriodResponse;
 import com.erp.erp_accounting.accounting.period.entity.AccountingPeriod;
+import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
@@ -48,14 +49,11 @@ public class AccountingPeriodCloseService {
         List<Account> leafAccounts = accountRepository.findLeafAccounts();
 
         // 이전 월 마감 잔액 조회 (스냅샷 기준)
-        Map<Long, BigDecimal> openingBalances =
-                loadPreviousClosingBalances(period.minusMonths(1));
+        Map<Long, BigDecimal> openingBalances = loadPreviousClosingBalances(period.minusMonths(1));
 
         // 이번 달 차변 / 대변 합계 (원장 기준)
-        LocalDate start = period.atDay(1);
-        LocalDate end = period.atEndOfMonth();
-        Map<Long, BigDecimal> debitSums = loadMonthlyDebitSums(start, end);
-        Map<Long, BigDecimal> creditSums = loadMonthlyCreditSums(start, end);
+        Map<Long, BigDecimal> debitSums = loadMonthlySums(period, LineType.DEBIT);
+        Map<Long, BigDecimal> creditSums = loadMonthlySums(period, LineType.CREDIT);
 
         // 대차검증
         validateMonthlyTrialBalance(debitSums, creditSums, period);
@@ -102,8 +100,13 @@ public class AccountingPeriodCloseService {
                 ));
     }
 
-    private Map<Long, BigDecimal> loadMonthlyDebitSums(LocalDate start, LocalDate end) {
-        return voucherLineRepository.findMonthlyDebitSum(start, end)
+    private Map<Long, BigDecimal> loadMonthlySums(YearMonth period, LineType type) {
+        LocalDate start = period.atDay(1);
+        LocalDate end = period.atEndOfMonth();
+
+        return (type == LineType.DEBIT
+                ? voucherLineRepository.findMonthlyDebitSum(start, end)
+                : voucherLineRepository.findMonthlyCreditSum(start, end))
                 .stream()
                 .collect(Collectors.toMap(
                         AccountAmountDto::getAccountId,
@@ -126,15 +129,6 @@ public class AccountingPeriodCloseService {
             throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
                     String.format("월별 잔액 불일치 (회계기간=%s, 차변 합계=%s, 대변 합계=%s)", period, totalDebit, totalCredit));
         }
-    }
-
-    private Map<Long, BigDecimal> loadMonthlyCreditSums(LocalDate start, LocalDate end) {
-        return voucherLineRepository.findMonthlyCreditSum(start, end)
-                .stream()
-                .collect(Collectors.toMap(
-                        AccountAmountDto::getAccountId,
-                        AccountAmountDto::getAmount
-                ));
     }
 
     private AccountingPeriodResponse toResponse(AccountingPeriod ap) {
