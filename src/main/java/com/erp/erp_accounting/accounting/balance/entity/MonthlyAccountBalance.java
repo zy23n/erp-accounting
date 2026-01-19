@@ -35,19 +35,19 @@ public class MonthlyAccountBalance extends BaseEntity {
     @Column(nullable = false)
     private YearMonth period;
 
-    @Column(nullable = false, precision = 19, scale = 4)
+    @Column(name = "opening_balance", nullable = false, precision = 19, scale = 4)
     private BigDecimal openingBalance;
 
-    @Column(nullable = false, precision = 19, scale = 4)
+    @Column(name = "debit_sum", nullable = false, precision = 19, scale = 4)
     private BigDecimal debitSum;
 
-    @Column(nullable = false, precision = 19, scale = 4)
+    @Column(name = "credit_sum", nullable = false, precision = 19, scale = 4)
     private BigDecimal creditSum;
 
-    @Column(nullable = false, precision = 19, scale = 4)
+    @Column(name = "closing_balance", nullable = false, precision = 19, scale = 4)
     private BigDecimal closingBalance;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "normal_balance", nullable = false)
     private NormalBalance normalBalance;
 }

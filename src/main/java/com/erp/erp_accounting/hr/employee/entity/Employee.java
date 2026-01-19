@@ -22,7 +22,7 @@ public class Employee extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "hire_date", nullable = false)
     private LocalDate hireDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
