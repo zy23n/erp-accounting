@@ -83,7 +83,6 @@ public class Voucher extends BaseEntity {
         this.sourceId = sourceId;
     }
 
-    // 양방향 연관관계 헬퍼 메서드
     public void addLine(VoucherLine line) {
         lines.add(line);
         line.setVoucher(this);
@@ -94,7 +93,6 @@ public class Voucher extends BaseEntity {
         line.setVoucher(null);
     }
 
-    // 상태 변경 헬퍼 메서드
     private void assertDraft() {
         if (this.status != VoucherStatus.DRAFT) {
             throw new BusinessException(ErrorCode.INVALID_STATE, "전표 상태 오류 (required=DRAFT)");

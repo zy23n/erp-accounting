@@ -2,7 +2,6 @@ package com.erp.erp_accounting.accounting.common;
 
 import com.erp.erp_accounting.accounting.voucher.entity.LineAmount;
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;

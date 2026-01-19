@@ -4,7 +4,6 @@ import com.erp.erp_accounting.common.util.QuerydslUtils;
 import com.erp.erp_accounting.hr.employee.entity.QEmployee;
 import com.erp.erp_accounting.hr.payroll.dto.query.PayrollSearchCondition;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollListResponse;
-import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollStatus;
 import com.erp.erp_accounting.hr.payroll.entity.QPayroll;
 import com.querydsl.core.types.Projections;

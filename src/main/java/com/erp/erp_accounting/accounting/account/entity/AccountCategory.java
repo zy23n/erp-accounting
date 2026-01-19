@@ -15,5 +15,4 @@ public enum AccountCategory {
     AccountCategory(String koreanName) {
         this.koreanName = koreanName;
     }
-
 }

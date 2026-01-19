@@ -50,7 +50,6 @@ public class VoucherLine implements LineAmount {
         this.amount = amount;
     }
 
-    // 양방향 연관관계 편의 메서드
     public void setVoucher(Voucher voucher) {
         this.voucher = voucher;
     }

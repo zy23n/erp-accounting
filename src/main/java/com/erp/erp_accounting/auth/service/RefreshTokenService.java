@@ -44,7 +44,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Refresh Token 미존재"));
 
-        if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (refreshToken.isExpired()) {
             throw new BusinessException(ErrorCode.INVALID_STATE, "RefreshToken 만료");
         }
 

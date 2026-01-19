@@ -1,6 +1,5 @@
 package com.erp.erp_accounting.accounting.account.dto.response;
 
-import com.erp.erp_accounting.accounting.account.entity.AccountCategory;
 import lombok.Builder;
 import lombok.Getter;
 
