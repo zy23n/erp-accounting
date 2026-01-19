@@ -1,8 +1,10 @@
 package com.erp.erp_accounting.accounting.voucher.controller;
 
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateRequest;
+import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherService;
+import com.erp.erp_accounting.accounting.voucher.service.command.CreateVoucherCommand;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,15 @@ public class VoucherController {
             @RequestBody @Valid VoucherCreateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Voucher voucher = voucherService.createVoucher(request, principal.getUser());
+        CreateVoucherCommand command = new CreateVoucherCommand(
+                request.getVoucherDate(),
+                request.getDescription(),
+                request.getLines(),
+                SourceType.NONE,
+                null
+        );
+
+        Voucher voucher = voucherService.createVoucher(command, principal.getUser());
         return ResponseEntity.ok(voucher.getId());
     }
 }

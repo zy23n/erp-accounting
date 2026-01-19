@@ -1,12 +1,12 @@
 package com.erp.erp_accounting.accounting.voucher.service;
 
 import com.erp.erp_accounting.accounting.account.service.AccountService;
-import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateRequest;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherLineRequest;
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherStatus;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import com.erp.erp_accounting.accounting.voucher.service.command.CreateVoucherCommand;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
@@ -60,15 +60,16 @@ public class AutoVoucherService {
 
         // 전표 생성 DTO
         LocalDate voucherDate = confirm.getPayMonth().atEndOfMonth();
-        VoucherCreateRequest request = new VoucherCreateRequest(
+        CreateVoucherCommand command = new CreateVoucherCommand(
                 voucherDate,
                 "급여 자동분개: " + confirm.getPayMonth(),
                 lines,
+                SourceType.PAYROLL,
                 confirm.getId()
         );
 
         // 전표 생성 + 자동 승인
-        voucherService.createAndAutoApprove(request, confirm.getConfirmedBy());
+        voucherService.createAndAutoApprove(command, confirm.getConfirmedBy());
     }
 
     private void addDebit(List<VoucherLineRequest> lines, Long accountId, BigDecimal amount) {

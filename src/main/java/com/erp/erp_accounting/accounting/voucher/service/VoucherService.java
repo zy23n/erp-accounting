@@ -3,10 +3,10 @@ package com.erp.erp_accounting.accounting.voucher.service;
 import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
 import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
-import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherCreateRequest;
 import com.erp.erp_accounting.accounting.voucher.dto.request.VoucherLineRequest;
 import com.erp.erp_accounting.accounting.voucher.entity.*;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
+import com.erp.erp_accounting.accounting.voucher.service.command.CreateVoucherCommand;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -31,32 +30,28 @@ public class VoucherService {
     private final AccountingPeriodService accountingPeriodService;
     private final VoucherValidator validator;
 
-    public Voucher createVoucher(VoucherCreateRequest request, User user) {
+    public Voucher createVoucher(CreateVoucherCommand command, User user) {
 
         // 회계기간 마감 여부 검증
-        assertVoucherPeriodOpen(request.getVoucherDate());
+        assertVoucherPeriodOpen(command.getVoucherDate());
 
         // 전표 라인 검증
-        validator.validateForCreate(request.getLines());
-
-        // voucherType, sourceType 자동 세팅
-        VoucherType voucherType = request.getSourceId() != null ? VoucherType.PAYROLL : VoucherType.GENERAL;
-        SourceType sourceType = request.getSourceId() != null ? SourceType.PAYROLL : SourceType.NONE;
+        validator.validateForCreate(command.getLines());
 
         // 전표 생성
         Voucher voucher = Voucher.builder()
                 .voucherNo(generateVoucherNo())
-                .voucherDate(request.getVoucherDate())
-                .description(request.getDescription())
+                .voucherDate(command.getVoucherDate())
+                .description(command.getDescription())
                 .status(VoucherStatus.DRAFT)
                 .createdBy(user)
-                .voucherType(voucherType)
-                .sourceType(sourceType)
-                .sourceId(request.getSourceId())
+                .voucherType(command.getSourceType().getVoucherType())
+                .sourceType(command.getSourceType())
+                .sourceId(command.getSourceId())
                 .build();
 
         // 전표 라인 생성
-        for (VoucherLineRequest lineRequest : request.getLines()) {
+        for (VoucherLineRequest lineRequest : command.getLines()) {
             VoucherLine voucherLine = createVoucherLine(lineRequest);
             voucher.addLine(voucherLine);
         }
@@ -64,13 +59,14 @@ public class VoucherService {
         // 저장
         voucherRepository.save(voucher);
 
-        log.info("[VOUCHER_CREATED] voucherId={}, voucherNo={}, userId={}", voucher.getId(), voucher.getVoucherNo(), user.getId());
+        log.info("[VOUCHER_CREATED] voucherId={}, voucherNo={}, sourceType={}, sourceId={}, userId={}",
+                voucher.getId(), voucher.getVoucherNo(), voucher.getSourceType(), voucher.getSourceId(), user.getId());
 
         return voucher;
     }
 
-    public Long createAndAutoApprove(VoucherCreateRequest request, User user) {
-        Voucher voucher = createVoucher(request, user);
+    public Long createAndAutoApprove(CreateVoucherCommand command, User user) {
+        Voucher voucher = createVoucher(command, user);
         voucher.approve(voucher.getCreatedBy());
         return voucher.getId();
     }

@@ -25,6 +25,4 @@ public class VoucherCreateRequest {
     @NotEmpty(message = "전표 라인 미존재")
     @Valid
     private List<VoucherLineRequest> lines;
-
-    private Long sourceId;
 }
