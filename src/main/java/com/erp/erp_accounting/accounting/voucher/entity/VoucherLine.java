@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Entity
 @Getter
 @NoArgsConstructor
-public class VoucherLine {
+public class VoucherLine implements LineAmount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +31,16 @@ public class VoucherLine {
 
     @Column(nullable = false)
     private BigDecimal amount;
+
+    @Override
+    public LineType getType() {
+        return type;
+    }
+
+    @Override
+    public BigDecimal getAmount() {
+        return amount;
+    }
 
     @Builder
     public VoucherLine(Voucher voucher, Account account, LineType type, BigDecimal amount) {

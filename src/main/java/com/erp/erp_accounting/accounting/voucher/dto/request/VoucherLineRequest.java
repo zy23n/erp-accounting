@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.accounting.voucher.dto.request;
 
+import com.erp.erp_accounting.accounting.voucher.entity.LineAmount;
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,7 +13,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VoucherLineRequest {
+public class VoucherLineRequest implements LineAmount {
 
     @NotNull(message = "계정과목 미입력")
     private Long accountId;
@@ -23,4 +24,14 @@ public class VoucherLineRequest {
     @NotNull(message = "금액 미입력")
     @Positive(message = "금액 0 이하")
     private BigDecimal amount;
+
+    @Override
+    public LineType getType() {
+        return type;
+    }
+
+    @Override
+    public BigDecimal getAmount() {
+        return amount;
+    }
 }

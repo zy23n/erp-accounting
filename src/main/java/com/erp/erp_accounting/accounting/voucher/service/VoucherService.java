@@ -29,6 +29,7 @@ public class VoucherService {
     private final VoucherRepository voucherRepository;
     private final AccountRepository accountRepository;
     private final AccountingPeriodService accountingPeriodService;
+    private final VoucherValidator validator;
 
     public Voucher createVoucher(VoucherCreateRequest request, User user) {
 
@@ -36,7 +37,7 @@ public class VoucherService {
         assertVoucherPeriodOpen(request.getVoucherDate());
 
         // 전표 라인 검증
-        validateLines(request);
+        validator.validateForCreate(request.getLines());
 
         // voucherType, sourceType 자동 세팅
         VoucherType voucherType = request.getSourceId() != null ? VoucherType.PAYROLL : VoucherType.GENERAL;
@@ -69,7 +70,6 @@ public class VoucherService {
     }
 
     public Long createAndAutoApprove(VoucherCreateRequest request, User user) {
-        assertVoucherPeriodOpen(request.getVoucherDate());
         Voucher voucher = createVoucher(request, user);
         voucher.approve(voucher.getCreatedBy());
         return voucher.getId();
@@ -77,7 +77,7 @@ public class VoucherService {
 
     public void cancelAutoVouchers(SourceType sourceType, Long sourceId, User canceler) {
         List<Voucher> vouchers = voucherRepository.findBySourceTypeAndSourceId(sourceType, sourceId);
-
+        if (vouchers.isEmpty()) return;
         assertVoucherPeriodOpen(vouchers.get(0).getVoucherDate());
 
         for (Voucher voucher : vouchers) {
@@ -91,49 +91,6 @@ public class VoucherService {
 
     private void assertVoucherPeriodOpen(LocalDate voucherDate) {
         accountingPeriodService.assertPeriodOpen(YearMonth.from(voucherDate));
-    }
-
-    private void validateLines(VoucherCreateRequest request) {
-        if (request.getLines() == null || request.getLines().isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "전표 라인 미존재.");
-        }
-
-        for (VoucherLineRequest line : request.getLines()) {
-            if (line.getAmount() == null) {
-                throw new BusinessException(ErrorCode.INVALID_REQUEST, "금액 미입력");
-            }
-
-            if (line.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new BusinessException(ErrorCode.INVALID_REQUEST, "전표 라인 금액 0 이하");
-            }
-
-            if (line.getType() == null) {
-                throw new BusinessException(ErrorCode.INVALID_REQUEST, "차변/대변 타입 미입력");
-            }
-        }
-
-        boolean hasDebit = request.getLines().stream().anyMatch(l -> l.getType() == LineType.DEBIT);
-        boolean hasCredit = request.getLines().stream().anyMatch(l -> l.getType() == LineType.CREDIT);
-
-        if (!hasDebit || !hasCredit) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "차변 또는 대변 라인 부족");
-        }
-
-        // 대차검증
-        BigDecimal debitSum = request.getLines().stream()
-                .filter(line -> line.getType() == LineType.DEBIT)
-                .map(VoucherLineRequest::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal creditSum = request.getLines().stream()
-                .filter(line -> line.getType() == LineType.CREDIT)
-                .map(VoucherLineRequest::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (debitSum.compareTo(creditSum) != 0) {
-            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
-                    String.format("요청 전표 대차 불일치 (차변 합계=%s, 대변 합계=%s)", debitSum, creditSum));
-        }
     }
 
     private VoucherLine createVoucherLine(VoucherLineRequest lineRequest) {

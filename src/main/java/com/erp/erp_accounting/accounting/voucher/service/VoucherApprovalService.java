@@ -23,6 +23,7 @@ public class VoucherApprovalService {
 
     private final VoucherRepository voucherRepository;
     private final AccountingPeriodService accountingPeriodService;
+    private final VoucherValidator validator;
 
     public VoucherApprovalResponse approve(Long voucherId, User approver) {
 
@@ -34,6 +35,7 @@ public class VoucherApprovalService {
 
         assertPeriodOpen(voucher);
 
+        validator.validateForApprove(voucher);
         voucher.approve(approver);
 
         log.info("[VOUCHER_APPROVED] voucherId={}, approverId={}", voucherId, approver.getId());

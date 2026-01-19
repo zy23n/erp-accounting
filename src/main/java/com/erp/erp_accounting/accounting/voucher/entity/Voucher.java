@@ -1,5 +1,7 @@
 package com.erp.erp_accounting.accounting.voucher.entity;
 
+import com.erp.erp_accounting.accounting.common.BalanceSum;
+import com.erp.erp_accounting.accounting.common.DebitCreditCalculator;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.global.entity.BaseEntity;
@@ -101,26 +103,11 @@ public class Voucher extends BaseEntity {
     }
 
     public void validateBalanced() {
-        BigDecimal debitSum = BigDecimal.ZERO;
-        BigDecimal creditSum = BigDecimal.ZERO;
-
-        if (lines.isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST, "전표 라인 미존재");
-        }
-
-        for (VoucherLine line : lines) {
-            BigDecimal amount = line.getAmount();
-
-            if (line.getType() == LineType.DEBIT) {
-                debitSum = debitSum.add(amount);
-            } else if (line.getType() == LineType.CREDIT) {
-                creditSum = creditSum.add(amount);
-            }
-        }
-
-        if (debitSum.compareTo(creditSum) != 0) {
+        BalanceSum sum = DebitCreditCalculator.calculate(lines);
+        if (!sum.isBalanced()) {
             throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
-                    String.format("전표 대차 불일치 (전표번호=%s, 차변 합계=%s, 대변 합계=%s)", this.voucherNo, debitSum, creditSum));
+                    String.format("전표 대차 불일치 (전표번호=%s, 차변 합계=%s, 대변 합계=%s)",
+                            this.voucherNo, sum.getDebit(), sum.getCredit()));
         }
     }
 
