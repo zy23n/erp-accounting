@@ -14,8 +14,8 @@ import com.erp.erp_accounting.accounting.common.BalanceCalculator;
 import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,9 +35,9 @@ public class MonthlyAccountBalanceService {
     private final MonthlyAccountBalanceRepository monthlyAccountBalanceRepository;
 
     public MonthlyAccountBalanceResponse getMonthlyBalance(MonthlyAccountBalanceRequest request) {
-        return accountingPeriodService.isClosed(request.getMonth())
-                ? getFromSnapshot(request)
-                : getRealtimeBalance(request);
+        boolean closed = accountingPeriodService.isClosed(request.getMonth());
+        log.info("월별 잔액 조회: month={}, accountId={}, closed={}", request.getMonth(), request.getAccountId(), closed);
+        return closed ? getFromSnapshot(request) : getRealtimeBalance(request);
     }
 
     // 마감 월: 스냅샷
