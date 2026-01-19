@@ -2,7 +2,7 @@ package com.erp.erp_accounting.accounting.balance.entity;
 
 import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.entity.NormalBalance;
-import com.erp.erp_accounting.global.entity.BaseEntity;
+import com.erp.erp_accounting.common.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

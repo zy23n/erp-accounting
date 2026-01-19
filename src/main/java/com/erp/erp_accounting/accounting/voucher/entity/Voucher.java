@@ -4,14 +4,13 @@ import com.erp.erp_accounting.accounting.common.BalanceSum;
 import com.erp.erp_accounting.accounting.common.DebitCreditCalculator;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
-import com.erp.erp_accounting.global.entity.BaseEntity;
+import com.erp.erp_accounting.common.base.BaseEntity;
 import com.erp.erp_accounting.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

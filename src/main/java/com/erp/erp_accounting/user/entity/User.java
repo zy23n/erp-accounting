@@ -1,6 +1,6 @@
 package com.erp.erp_accounting.user.entity;
 
-import com.erp.erp_accounting.global.entity.BaseEntity;
+import com.erp.erp_accounting.common.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

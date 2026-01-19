@@ -1,4 +1,4 @@
-package com.erp.erp_accounting.global.entity;
+package com.erp.erp_accounting.common.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

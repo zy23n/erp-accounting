@@ -2,7 +2,7 @@ package com.erp.erp_accounting.hr.payroll.entity;
 
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
-import com.erp.erp_accounting.global.entity.BaseEntity;
+import com.erp.erp_accounting.common.base.BaseEntity;
 import com.erp.erp_accounting.hr.employee.entity.Employee;
 import jakarta.persistence.*;
 import lombok.Builder;
