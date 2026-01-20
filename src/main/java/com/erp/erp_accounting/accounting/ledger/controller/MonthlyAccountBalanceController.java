@@ -21,13 +21,13 @@ public class MonthlyAccountBalanceController {
     public ResponseEntity<MonthlyAccountBalanceResponse> getMonthlyAccountBalance(
             @Valid @ModelAttribute MonthlyAccountBalanceRequest request
     ) {
-        log.info("MonthlyAccountBalance 조회 요청: accountId={}, month={}", request.getAccountId(), request.getMonth());
+        log.info("[MONTHLY_BALANCE] action=QUERY_REQUEST, accountId={}, month={}", request.getAccountId(), request.getMonth());
 
         MonthlyAccountBalanceResponse response = monthlyAccountBalanceService.getMonthlyBalance(request);
 
-        log.info("MonthlyAccountBalance 조회 완료: opening={}, debit={}, credit={}, closing={}",
-                response.getOpeningBalance(), response.getTotalDebit(),
-                response.getTotalCredit(), response.getClosingBalance());
+        log.info("[MONTHLY_BALANCE] action=QUERY_COMPLETE, accountId={}, month={}, openingBalance={}, totalDebit={}, totalCredit={}, closingBalance={}",
+                request.getAccountId(), request.getMonth(), response.getOpeningBalance(),
+                response.getTotalDebit(), response.getTotalCredit(), response.getClosingBalance());
 
         return ResponseEntity.ok(response);
     }

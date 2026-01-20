@@ -41,6 +41,8 @@ public class AccountingPeriodCloseService {
     // 회계기간 마감
     public AccountingPeriodResponse closePeriod(YearMonth period, User closer) {
 
+        log.info("[ACCOUNTING_PERIOD] action=CLOSE_REQUEST, period={}, closerId={}", period, closer.getId());
+
         // 마감 가능 여부 검증
         accountingPeriodService.assertPreviousPeriodClosed(period);
         AccountingPeriod accountingPeriod = accountingPeriodService.getPeriodForClosing(period);
@@ -70,13 +72,16 @@ public class AccountingPeriodCloseService {
         // 회계기간 상태 변경
         accountingPeriodService.close(period, closer);
 
-        log.info("[PERIOD_CLOSED] period={}, closedBy={}, snapshotCount={}", period, closer.getId(), balances.size());
+        log.info("[ACCOUNTING_PERIOD] action=CLOSE_COMPLETE, period={}, closerId={}, snapshotCount={}",
+                period, closer.getId(), balances.size());
 
         return toResponse(accountingPeriod);
     }
 
     // 회계기간 마감 취소
     public AccountingPeriodResponse reopenPeriod(YearMonth period, User reopener) {
+
+        log.info("[ACCOUNTING_PERIOD] action=REOPEN_REQUEST, period={}, reopenerId={}", period, reopener.getId());
 
         // 스냅샷 제거
         monthlyAccountBalanceRepository.deleteByPeriod(period);
@@ -86,7 +91,7 @@ public class AccountingPeriodCloseService {
 
         AccountingPeriod reopenedPeriod = accountingPeriodService.getByPeriod(period);
 
-        log.info("[PERIOD_REOPENED] period={}, reopenedBy={}", period, reopener.getId());
+        log.info("[ACCOUNTING_PERIOD] action=REOPEN_COMPLETE, period={}, reopenerId={}", period, reopener.getId());
 
         return toResponse(reopenedPeriod);
     }

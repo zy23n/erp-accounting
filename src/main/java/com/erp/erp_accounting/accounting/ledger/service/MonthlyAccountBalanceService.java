@@ -36,7 +36,8 @@ public class MonthlyAccountBalanceService {
 
     public MonthlyAccountBalanceResponse getMonthlyBalance(MonthlyAccountBalanceRequest request) {
         boolean closed = accountingPeriodService.isClosed(request.getMonth());
-        log.info("월별 잔액 조회: month={}, accountId={}, closed={}", request.getMonth(), request.getAccountId(), closed);
+        log.info("[MONTHLY_BALANCE] action=QUERY, accountId={}, month={}, closed={}",
+                request.getAccountId(), request.getMonth(), closed);
         return closed ? getFromSnapshot(request) : getRealtimeBalance(request);
     }
 

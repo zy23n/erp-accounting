@@ -25,8 +25,13 @@ public class AccountingPeriodCloseController {
             @PathVariable("period") String period,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        log.info("[CLOSE_PERIOD_REQUEST] period={}, userId={}", period, principal.getUser().getId());
-        return ResponseEntity.ok(accountingPeriodCloseService.closePeriod(YearMonth.parse(period), principal.getUser()));
+        log.info("[ACCOUNTING_PERIOD] action=CLOSE_REQUEST, period={}, closerId={}", period, principal.getUser().getId());
+
+        AccountingPeriodResponse response = accountingPeriodCloseService.closePeriod(YearMonth.parse(period), principal.getUser());
+
+        log.info("[ACCOUNTING_PERIOD] action=CLOSE_COMPLETE, period={}, closerId={}, status={}",
+                period, principal.getUser().getId(), response.getStatus());
+        return ResponseEntity.ok(response);
     }
 
     // 마감 취소
@@ -35,7 +40,13 @@ public class AccountingPeriodCloseController {
             @PathVariable("period") String period,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        log.info("[REOPEN_PERIOD_REQUEST] period={}, userId={}", period, principal.getUser().getId());
-        return ResponseEntity.ok(accountingPeriodCloseService.reopenPeriod(YearMonth.parse(period), principal.getUser()));
+        log.info("[ACCOUNTING_PERIOD] action=REOPEN_REQUEST, period={}, reopenerId={}", period, principal.getUser().getId());
+
+        AccountingPeriodResponse response = accountingPeriodCloseService.reopenPeriod(YearMonth.parse(period), principal.getUser());
+
+        log.info("[ACCOUNTING_PERIOD] action=REOPEN_COMPLETE, period={}, reopenerId={}, status={}",
+                period, principal.getUser().getId(), response.getStatus());
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -35,12 +35,12 @@ public class PayrollConfirmService {
     // 급여 확정 생성
     public Long createConfirm(YearMonth payMonth) {
 
-        log.info("급여 확정 생성 요청: payMonth={}", payMonth);
+        log.info("[PAYROLL_CONFIRM] action=CREATE_REQUEST, payMonth={}", payMonth);
 
         assertPayrollPeriodOpen(payMonth);
 
         if (payrollConfirmRepository.existsByPayMonth(payMonth)) {
-            log.warn("이미 존재하는 급여 확정: payMonth={}", payMonth);
+            log.info("[PAYROLL_CONFIRM] action=DUPLICATE_DETECTED, payMonth={}", payMonth);
             throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE, String.format("급여 확정 중복 존재 (payMonth=%s)", payMonth));
         }
 
@@ -49,7 +49,7 @@ public class PayrollConfirmService {
         PayrollConfirm confirm = PayrollConfirm.builder().payMonth(payMonth).build();
         payrollConfirmRepository.save(confirm);
 
-        log.info("급여 확정 생성 완료: payrollConfirmId={}", confirm.getId());
+        log.info("[PAYROLL_CONFIRM] action=CREATE_COMPLETE, payrollConfirmId={}, payMonth={}", confirm.getId(), confirm.getId());
 
         return confirm.getId();
     }
@@ -57,7 +57,8 @@ public class PayrollConfirmService {
     // 급여 확정 처리 (최초 확정 + 재확정 공용)
     public void confirm(Long payrollConfirmId, User confirmer) {
 
-        log.info("급여 확정 처리 요청: payrollConfirmId={}, user={}", payrollConfirmId, confirmer.getUsername());
+        log.info("[PAYROLL_CONFIRM] action=PROCESS_REQUEST, payrollConfirmId={}, confirmerId={}",
+                payrollConfirmId, confirmer.getId());
 
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
@@ -75,13 +76,15 @@ public class PayrollConfirmService {
         confirm.confirm(confirmer);
         autoVoucherService.createFromPayrollConfirm(confirm);
 
-        log.info("급여 확정 완료: payrollConfirmId={}", payrollConfirmId);
+        log.info("[PAYROLL_CONFIRM] action=PROCESS_COMPLETE, payrollConfirmId={}, confirmerId={}, payMonth={}",
+                payrollConfirmId, confirmer.getId(), confirm.getPayMonth());
     }
 
     // 급여 확정 취소
     public void cancel(Long payrollConfirmId, User canceler) {
 
-        log.info("급여 확정 취소 요청: payrollConfirmId={}, user={}", payrollConfirmId, canceler.getUsername());
+        log.info("[PAYROLL_CONFIRM] action=CANCEL_REQUEST, payrollConfirmId={}, cancelerId={}",
+                payrollConfirmId, canceler.getId());
 
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
@@ -93,7 +96,8 @@ public class PayrollConfirmService {
         // 급여 확정 취소
         confirm.cancel(canceler);
 
-        log.info("급여 확정 취소 요청: payrollConfirmId={}, user={}", payrollConfirmId, canceler.getUsername());
+        log.info("[PAYROLL_CONFIRM] action=CANCEL_COMPLETE, payrollConfirmId={}, cancelerId={}, payMonth={}",
+                payrollConfirmId, canceler.getId(), confirm.getPayMonth());
     }
 
     private PayrollConfirm findConfirm(Long payrollConfirmId) {

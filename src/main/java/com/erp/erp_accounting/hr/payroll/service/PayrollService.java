@@ -23,7 +23,7 @@ public class PayrollService {
 
     public Long createPayroll(PayrollCreateRequest request) {
 
-        log.info("급여 생성 요청: employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
+        log.info("[PAYROLL] action=CREATE_REQUEST, employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
 
         Employee employee = employeeRepository.findById(request.getEmployeeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
@@ -32,8 +32,7 @@ public class PayrollService {
         boolean exists = payrollRepository.existsByEmployee_IdAndPayMonth(request.getEmployeeId(), request.getPayMonth());
 
         if (exists) {
-            log.warn("이미 존재하는 급여: employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
-
+            log.warn("[PAYROLL] action=CREATE_DUPLICATE, employeeId={}, payMonth={}", request.getEmployeeId(), request.getPayMonth());
             throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE,
                     String.format("급여 중복 존재 (payMonth=%s, employeeId=%d)", request.getPayMonth(), request.getEmployeeId()));
         }
@@ -49,7 +48,9 @@ public class PayrollService {
         payroll.calculateNetAmount();
         payrollRepository.save(payroll);
 
-        log.info("급여 생성 완료: payrollId={}", payroll.getId());
+        log.info("[PAYROLL] action=CREATE_COMPLETE, payrollId={}, employeeId={}, payMonth={}",
+                payroll.getId(), request.getEmployeeId(), request.getPayMonth());
+
         return payroll.getId();
     }
 }

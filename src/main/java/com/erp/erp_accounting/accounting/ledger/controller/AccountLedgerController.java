@@ -21,12 +21,13 @@ public class AccountLedgerController {
     public ResponseEntity<AccountLedgerResponse> getAccountLedger(
             @Valid @ModelAttribute AccountLedgerRequest request
     ) {
-        log.info("AccountLedger 조회 요청: accountId={}, startDate={}, endDate={}",
+        log.info("[ACCOUNT_LEDGER] action=QUERY_REQUEST, accountId={}, startDate={}, endDate={}",
                 request.getAccountId(), request.getStartDate(), request.getEndDate());
 
         AccountLedgerResponse response = accountLedgerService.getAccountLedger(request);
 
-        log.info("AccountLedger 조회 완료: openingBalance={}, closingBalance={}, rows={}",
+        log.info("[ACCOUNT_LEDGER] action=QUERY_COMPLETE, accountId={}, startDate={}, endDate={}, openingBalance={}, closingBalance={}, rows={}",
+                request.getAccountId(), request.getStartDate(), request.getEndDate(),
                 response.getOpeningBalance(), response.getClosingBalance(), response.getItems().size());
 
         return ResponseEntity.ok(response);

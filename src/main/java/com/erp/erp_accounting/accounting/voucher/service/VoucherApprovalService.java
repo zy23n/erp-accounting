@@ -38,7 +38,7 @@ public class VoucherApprovalService {
         validator.validateForApprove(voucher);
         voucher.approve(approver);
 
-        log.info("[VOUCHER_APPROVED] voucherId={}, approverId={}", voucherId, approver.getId());
+        log.info("[VOUCHER] action=APPROVE, voucherId={}, approverId={}", voucher.getId(), approver.getId());
 
         return toResponse(voucher);
     }
@@ -55,7 +55,7 @@ public class VoucherApprovalService {
 
         voucher.reject(approver);
 
-        log.info("[VOUCHER_REJECTED] voucherId={}, approverId={}", voucherId, approver.getId());
+        log.info("[VOUCHER] action=REJECT, voucherId={}, approverId={}", voucher.getId(), approver.getId());
 
         return toResponse(voucher);
     }
