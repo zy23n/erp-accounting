@@ -33,17 +33,6 @@ public class PayrollQueryService {
             "payMonth", "baseSalary", "netAmount", "status", "createdAt"
     );
 
-    public Pageable validateSortFields(Pageable pageable) {
-        List<Sort.Order> safeOrders = pageable.getSort().stream()
-                .filter(order -> ALLOWED_SORT_FIELDS.contains(order.getProperty()))
-                .toList();
-        Sort sort = safeOrders.isEmpty()
-                ? Sort.by(Sort.Direction.DESC, "payMonth")
-                : Sort.by(safeOrders);
-
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-    }
-
     // 급여 상세 조회
     public PayrollResponse getPayroll(Long payrollId, UserPrincipal principal) {
         Payroll payroll = payrollRepository.findById(payrollId)
@@ -67,12 +56,13 @@ public class PayrollQueryService {
     public Page<PayrollListResponse> searchPayrolls(UserPrincipal principal, PayrollSearchCondition condition, Pageable pageable) {
 
         validateCondition(condition);
+        Pageable safePageable = validateSortFields(pageable);
 
         // HR / ADMIN → 전체 조회, USER → 본인 급여만
         if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {
-            return payrollQueryRepository.search(condition, pageable);
+            return payrollQueryRepository.search(condition, safePageable);
         }
-        return payrollQueryRepository.searchByEmployee(principal.getId(), condition, pageable);
+        return payrollQueryRepository.searchByEmployee(principal.getId(), condition, safePageable);
     }
 
     private PayrollResponse toResponse(Payroll payroll) {
@@ -103,6 +93,17 @@ public class PayrollQueryService {
                 cond.getStartHireDate().isAfter(cond.getEndHireDate())) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST, "입사일 범위 오류 (startHireDate > endHireDate)");
         }
+    }
+
+    private Pageable validateSortFields(Pageable pageable) {
+        List<Sort.Order> safeOrders = pageable.getSort().stream()
+                .filter(order -> ALLOWED_SORT_FIELDS.contains(order.getProperty()))
+                .toList();
+        Sort sort = safeOrders.isEmpty()
+                ? Sort.by(Sort.Direction.DESC, "payMonth")
+                : Sort.by(safeOrders);
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 }
 

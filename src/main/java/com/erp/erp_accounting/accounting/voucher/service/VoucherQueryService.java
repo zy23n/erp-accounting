@@ -33,17 +33,6 @@ public class VoucherQueryService {
             "voucherDate", "voucherNo", "createdAt", "voucherType", "sourceType"
     );
 
-    public Pageable validateSortFields(Pageable pageable) {
-        List<Sort.Order> safeOrders = pageable.getSort().stream()
-                .filter(order -> ALLOWED_SORT_FIELDS.contains(order.getProperty()))
-                .toList();
-        Sort sort = safeOrders.isEmpty()
-                ? Sort.by(Sort.Order.desc("voucherDate"), Sort.Order.desc("voucherNo"))
-                : Sort.by(safeOrders);
-
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-    }
-
     // 단건 조회
     public VoucherResponse getVoucher(Long voucherId) {
         Voucher voucher = voucherRepository.findWithLinesById(voucherId)
@@ -56,7 +45,8 @@ public class VoucherQueryService {
     // 목록 조회 (QueryDSL)
     public Page<VoucherListResponse> searchVouchers(VoucherSearchCondition condition, Pageable pageable) {
         validateCondition(condition);
-        return voucherQueryRepository.search(condition, pageable);
+        Pageable safePageable = validateSortFields(pageable);
+        return voucherQueryRepository.search(condition, safePageable);
     }
 
     // DTO 변환
@@ -108,5 +98,16 @@ public class VoucherQueryService {
         if (cond.getStartDate() != null && cond.getEndDate() != null && cond.getStartDate().isAfter(cond.getEndDate())) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST, "조회 기간 범위 오류 (startDate > endDate)");
         }
+    }
+
+    private Pageable validateSortFields(Pageable pageable) {
+        List<Sort.Order> safeOrders = pageable.getSort().stream()
+                .filter(order -> ALLOWED_SORT_FIELDS.contains(order.getProperty()))
+                .toList();
+        Sort sort = safeOrders.isEmpty()
+                ? Sort.by(Sort.Order.desc("voucherDate"), Sort.Order.desc("voucherNo"))
+                : Sort.by(safeOrders);
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 }

@@ -34,7 +34,6 @@ public class PayrollQueryController {
             @AuthenticationPrincipal UserPrincipal principal,
             @ModelAttribute PayrollSearchCondition condition, Pageable pageable
     ) {
-        Pageable safePageable = payrollQueryService.validateSortFields(pageable);
-        return ResponseEntity.ok(payrollQueryService.searchPayrolls(principal, condition, safePageable));
+        return ResponseEntity.ok(payrollQueryService.searchPayrolls(principal, condition, pageable));
     }
 }

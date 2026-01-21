@@ -28,7 +28,6 @@ public class VoucherQueryController {
     public ResponseEntity<Page<VoucherListResponse>> getVoucherList(
             @ModelAttribute VoucherSearchCondition condition, Pageable pageable
     ) {
-        Pageable safePageable = voucherQueryService.validateSortFields(pageable);
-        return ResponseEntity.ok(voucherQueryService.searchVouchers(condition, safePageable));
+        return ResponseEntity.ok(voucherQueryService.searchVouchers(condition, pageable));
     }
 }
