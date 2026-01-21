@@ -1,7 +1,6 @@
 package com.erp.erp_accounting.accounting.ledger.repository;
 
 import com.erp.erp_accounting.accounting.balance.dto.query.AccountAmountDto;
-import com.erp.erp_accounting.accounting.ledger.dto.query.AccountLedgerQueryDto;
 import com.erp.erp_accounting.accounting.ledger.dto.query.MonthlyBalanceQueryDto;
 import com.erp.erp_accounting.accounting.ledger.dto.query.OpeningBalanceDto;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherLine;
@@ -31,28 +30,6 @@ public interface VoucherLineRepository extends JpaRepository<VoucherLine, Long> 
     OpeningBalanceDto findOpeningBalance(
             @Param("accountId") Long accountId,
             @Param("startDate") LocalDate startDate
-    );
-
-    // 원장 조회
-    @Query("""
-        select new com.erp.erp_accounting.accounting.ledger.dto.query.AccountLedgerQueryDto(
-            v.voucherDate,
-            v.voucherNo,
-            v.description,
-            vl.type,
-            vl.amount
-        )
-        from VoucherLine vl
-        join vl.voucher v
-        where vl.account.id = :accountId
-          and v.voucherDate between :startDate and :endDate
-          and v.status = 'APPROVED'
-        order by v.voucherDate, vl.id
-    """)
-    List<AccountLedgerQueryDto> findAccountLedger(
-            @Param("accountId") Long accountId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
     );
 
     // 이번 달 총합 조회

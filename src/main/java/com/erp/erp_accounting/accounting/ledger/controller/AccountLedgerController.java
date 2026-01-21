@@ -1,6 +1,6 @@
 package com.erp.erp_accounting.accounting.ledger.controller;
 
-import com.erp.erp_accounting.accounting.ledger.dto.request.AccountLedgerRequest;
+import com.erp.erp_accounting.accounting.ledger.dto.query.AccountLedgerSearchCondition;
 import com.erp.erp_accounting.accounting.ledger.dto.response.AccountLedgerResponse;
 import com.erp.erp_accounting.accounting.ledger.service.AccountLedgerService;
 import jakarta.validation.Valid;
@@ -19,15 +19,15 @@ public class AccountLedgerController {
 
     @GetMapping("/account")
     public ResponseEntity<AccountLedgerResponse> getAccountLedger(
-            @Valid @ModelAttribute AccountLedgerRequest request
+            @Valid @ModelAttribute AccountLedgerSearchCondition condition
     ) {
         log.info("[ACCOUNT_LEDGER] action=QUERY_REQUEST, accountId={}, startDate={}, endDate={}",
-                request.getAccountId(), request.getStartDate(), request.getEndDate());
+                condition.getAccountId(), condition.getStartDateOrDefault(), condition.getEndDateOrDefault());
 
-        AccountLedgerResponse response = accountLedgerService.getAccountLedger(request);
+        AccountLedgerResponse response = accountLedgerService.searchAccountLedger(condition);
 
         log.info("[ACCOUNT_LEDGER] action=QUERY_COMPLETE, accountId={}, startDate={}, endDate={}, openingBalance={}, closingBalance={}, rows={}",
-                request.getAccountId(), request.getStartDate(), request.getEndDate(),
+                condition.getAccountId(), condition.getStartDateOrDefault(), condition.getEndDateOrDefault(),
                 response.getOpeningBalance(), response.getClosingBalance(), response.getItems().size());
 
         return ResponseEntity.ok(response);
