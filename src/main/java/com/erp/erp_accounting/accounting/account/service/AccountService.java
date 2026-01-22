@@ -59,18 +59,9 @@ public class AccountService {
 
     // 급여 항목 → 계정 ID 반환
     public Long getAccountId(PayrollItem item) {
-        String code;
-        switch (item) {
-            case BASE_SALARY -> code = "1010";
-            case BONUS -> code = "1020";
-            case DEDUCTION -> code = "2010";
-            case CASH -> code = "1011";
-            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST, "지원하지 않는 급여 항목");
-        }
-
-        return accountRepository.findByCode(code)
+        return accountRepository.findByCode(item.getAccountCode())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
-                        String.format("급여 항목-계정 매핑 정보 미존재 (item=%s, code=%s)", item, code)))
+                        String.format("급여 항목-계정 매핑 정보 미존재 (item=%s)", item)))
                 .getId();
     }
 }
