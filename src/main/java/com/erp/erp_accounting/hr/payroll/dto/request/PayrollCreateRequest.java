@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.hr.payroll.dto.request;
 
+import com.erp.erp_accounting.hr.payroll.entity.PaymentMethod;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -29,4 +30,7 @@ public class PayrollCreateRequest {
 
     @NotNull @PositiveOrZero(message = "공제액 음수")
     private BigDecimal deductionAmount;
+
+    @NotNull(message = "지급수단 미입력")
+    private PaymentMethod paymentMethod;
 }

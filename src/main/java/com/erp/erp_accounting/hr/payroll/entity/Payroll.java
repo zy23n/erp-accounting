@@ -52,6 +52,10 @@ public class Payroll extends BaseEntity {
     @Column(nullable = false)
     private PayrollStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false)
+    private PaymentMethod paymentMethod;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payroll_confirm_id")
     private PayrollConfirm payrollConfirm;
@@ -96,12 +100,13 @@ public class Payroll extends BaseEntity {
 
     @Builder
     public Payroll(Employee employee, YearMonth payMonth, BigDecimal baseSalary,
-                   BigDecimal allowanceAmount, BigDecimal deductionAmount) {
+                   BigDecimal allowanceAmount, BigDecimal deductionAmount, PaymentMethod paymentMethod) {
         this.employee = employee;
         this.payMonth = payMonth;
         this.baseSalary = baseSalary;
         this.allowanceAmount = allowanceAmount;
         this.deductionAmount = deductionAmount;
+        this.paymentMethod = paymentMethod;
         this.status = PayrollStatus.CREATED;
     }
 }

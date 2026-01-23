@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.hr.payroll.dto.response;
 
+import com.erp.erp_accounting.hr.payroll.entity.PaymentMethod;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,4 +21,5 @@ public class PayrollListResponse {
     private YearMonth payMonth;
     private BigDecimal netAmount;
     private PayrollStatus status;
+    private PaymentMethod paymentMethod;
 }

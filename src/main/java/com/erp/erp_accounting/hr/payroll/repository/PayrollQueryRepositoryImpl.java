@@ -64,7 +64,8 @@ public class PayrollQueryRepositoryImpl implements PayrollQueryRepository {
                                 e.position,
                                 p.payMonth,
                                 p.netAmount,
-                                p.status
+                                p.status,
+                                p.paymentMethod
                         ))
                         .from(p)
                         .join(p.employee, e)

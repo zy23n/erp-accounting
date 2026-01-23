@@ -43,6 +43,7 @@ public class PayrollService {
                 .baseSalary(request.getBaseSalary())
                 .allowanceAmount(request.getAllowanceAmount())
                 .deductionAmount(request.getDeductionAmount())
+                .paymentMethod(request.getPaymentMethod())
                 .build();
 
         payroll.calculateNetAmount();

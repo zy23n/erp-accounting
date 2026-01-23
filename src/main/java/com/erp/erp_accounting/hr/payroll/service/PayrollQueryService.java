@@ -75,7 +75,8 @@ public class PayrollQueryService {
                 payroll.getAllowanceAmount(),
                 payroll.getDeductionAmount(),
                 payroll.getNetAmount(),
-                payroll.getStatus()
+                payroll.getStatus(),
+                payroll.getPaymentMethod()
         );
     }
 
