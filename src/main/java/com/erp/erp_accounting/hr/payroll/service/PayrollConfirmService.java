@@ -111,8 +111,7 @@ public class PayrollConfirmService {
     }
 
     private List<Payroll> getCalculatedPayrolls(YearMonth payMonth) {
-        List<Payroll> payrolls =
-                payrollRepository.findByPayMonthAndStatus(payMonth, PayrollStatus.CALCULATED);
+        List<Payroll> payrolls = payrollRepository.findByPayMonthAndStatus(payMonth, PayrollStatus.CALCULATED);
 
         if (payrolls.isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_STATE, String.format("CALCULATED 상태 급여 미존재 (payMonth=%s)", payMonth));

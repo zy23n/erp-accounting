@@ -41,7 +41,7 @@ public class PayrollQueryService {
 
         // HR / ADMIN은 전체 조회 가능
         if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {
-            return toResponse(payroll);
+            return PayrollResponse.fromEntity(payroll);
         }
 
         // USER는 본인 데이터만 조회 가능
@@ -49,7 +49,7 @@ public class PayrollQueryService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "본인 급여만 조회 가능");
         }
 
-        return toResponse(payroll);
+        return PayrollResponse.fromEntity(payroll);
     }
 
     // 급여 목록 조회 (전체)
@@ -63,21 +63,6 @@ public class PayrollQueryService {
             return payrollQueryRepository.search(condition, safePageable);
         }
         return payrollQueryRepository.searchByEmployee(principal.getId(), condition, safePageable);
-    }
-
-    private PayrollResponse toResponse(Payroll payroll) {
-        return new PayrollResponse(
-                payroll.getId(),
-                payroll.getEmployee().getId(),
-                payroll.getEmployee().getName(),
-                payroll.getPayMonth(),
-                payroll.getBaseSalary(),
-                payroll.getAllowanceAmount(),
-                payroll.getDeductionAmount(),
-                payroll.getNetAmount(),
-                payroll.getStatus(),
-                payroll.getPaymentMethod()
-        );
     }
 
     private void validateCondition(PayrollSearchCondition cond) {

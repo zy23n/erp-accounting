@@ -1,7 +1,10 @@
 package com.erp.erp_accounting.hr.payroll.dto.response;
 
+import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirmStatus;
+import com.erp.erp_accounting.user.entity.User;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -9,6 +12,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class PayrollConfirmResponse {
     private Long id;
@@ -24,4 +28,31 @@ public class PayrollConfirmResponse {
     private LocalDateTime canceledAt;
 
     private List<PayrollResponse> payrolls;
+
+    public static PayrollConfirmResponse fromEntity(PayrollConfirm confirm) {
+        List<PayrollResponse> payrolls = confirm.getPayrolls().stream()
+                .map(PayrollResponse::fromEntity)
+                .toList();
+
+        return PayrollConfirmResponse.builder()
+                .id(confirm.getId())
+                .payMonth(confirm.getPayMonth())
+                .status(confirm.getStatus())
+                .confirmedById(getUserId(confirm.getConfirmedBy()))
+                .confirmedByUsername(getUsername(confirm.getConfirmedBy()))
+                .confirmedAt(confirm.getConfirmedAt())
+                .canceledById(getUserId(confirm.getCanceledBy()))
+                .canceledByUsername(getUsername(confirm.getCanceledBy()))
+                .canceledAt(confirm.getCanceledAt())
+                .payrolls(payrolls)
+                .build();
+    }
+
+    private static Long getUserId(User user) {
+        return user != null ? user.getId() : null;
+    }
+
+    private static String getUsername(User user) {
+        return user != null ? user.getUsername() : null;
+    }
 }
