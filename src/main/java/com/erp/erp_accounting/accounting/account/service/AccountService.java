@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class AccountService {
     public List<AccountTreeResponse> getAccountTree() {
         List<Account> roots = accountRepository.findRootAccounts();
         return roots.stream()
-                .map(this::toResponse)
+                .map(AccountTreeResponse::fromEntity)
                 .toList();
     }
 
@@ -33,29 +32,8 @@ public class AccountService {
     public List<AccountTreeResponse> getLeafAccounts() {
         List<Account> leafAccounts = accountRepository.findLeafAccounts();
         return leafAccounts.stream()
-                .map(account -> AccountTreeResponse.builder()
-                        .id(account.getId())
-                        .code(account.getCode())
-                        .name(account.getName())
-                        .category(account.getCategory().getKoreanName())
-                        .children(List.of())
-                        .build())
+                .map(AccountTreeResponse::fromEntity)
                 .toList();
-    }
-
-    // DTO 변환, 재귀 처리
-    private AccountTreeResponse toResponse(Account account) {
-        List<AccountTreeResponse> children = account.getChildren().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-
-        return AccountTreeResponse.builder()
-                .id(account.getId())
-                .code(account.getCode())
-                .name(account.getName())
-                .category(account.getCategory().getKoreanName())
-                .children(children)
-                .build();
     }
 
     // 급여 항목 → 계정 ID 반환
