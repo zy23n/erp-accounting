@@ -1,17 +1,16 @@
 package com.erp.erp_accounting.accounting.voucher.dto.response;
 
 import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
+import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.erp.erp_accounting.user.entity.User;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
 public class VoucherApprovalResponse {
     private Long voucherId;
@@ -23,4 +22,21 @@ public class VoucherApprovalResponse {
     private VoucherType voucherType;
     private SourceType sourceType;
     private Long sourceId;
+
+    public static VoucherApprovalResponse fromEntity(Voucher voucher) {
+        return VoucherApprovalResponse.builder()
+                .voucherId(voucher.getId())
+                .status(voucher.getStatus().name())
+                .approvedById(getUserId(voucher.getApprovedBy()))
+                .approvedByUsername(getUsername(voucher.getApprovedBy()))
+                .approvedAt(voucher.getApprovedAt())
+                .voucherType(voucher.getVoucherType())
+                .sourceType(voucher.getSourceType())
+                .sourceId(voucher.getSourceId())
+                .build();
+    }
+
+    private static Long getUserId(User user) { return user != null ? user.getId() : null; }
+
+    private static String getUsername(User user) { return user != null ? user.getUsername() : null; }
 }

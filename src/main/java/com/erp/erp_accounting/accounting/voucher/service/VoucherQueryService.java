@@ -1,7 +1,6 @@
 package com.erp.erp_accounting.accounting.voucher.service;
 
 import com.erp.erp_accounting.accounting.voucher.dto.query.VoucherSearchCondition;
-import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherLineResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
@@ -9,7 +8,6 @@ import com.erp.erp_accounting.accounting.voucher.repository.VoucherQueryReposito
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
-import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +37,7 @@ public class VoucherQueryService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         String.format("전표 미존재 (voucherId=%d)", voucherId)));
 
-        return toResponse(voucher);
+        return VoucherResponse.fromEntity(voucher);
     }
 
     // 목록 조회 (QueryDSL)
@@ -47,48 +45,6 @@ public class VoucherQueryService {
         validateCondition(condition);
         Pageable safePageable = validateSortFields(pageable);
         return voucherQueryRepository.search(condition, safePageable);
-    }
-
-    // DTO 변환
-    private VoucherResponse toResponse(Voucher voucher) {
-
-        List<VoucherLineResponse> lines = voucher.getLines().stream()
-                .map(line -> new VoucherLineResponse(
-                        line.getId(),
-                        line.getAccount().getId(),
-                        line.getAccount().getName(),
-                        line.getType().name(),
-                        line.getAmount()
-                ))
-                .toList();
-
-        return new VoucherResponse(
-                voucher.getId(),
-                voucher.getVoucherNo(),
-                voucher.getVoucherDate(),
-                voucher.getDescription(),
-                voucher.getStatus(),
-                userId(voucher.getCreatedBy()),
-                username(voucher.getCreatedBy()),
-                lines,
-                voucher.getVoucherType(),
-                voucher.getSourceType(),
-                voucher.getSourceId(),
-                userId(voucher.getApprovedBy()),
-                username(voucher.getApprovedBy()),
-                voucher.getApprovedAt(),
-                userId(voucher.getCanceledBy()),
-                username(voucher.getCanceledBy()),
-                voucher.getCanceledAt()
-        );
-    }
-
-    private Long userId(User user) {
-        return user != null ? user.getId() : null;
-    }
-
-    private String username(User user) {
-        return user != null ? user.getUsername() : null;
     }
 
     private void validateCondition(VoucherSearchCondition cond) {

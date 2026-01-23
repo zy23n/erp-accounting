@@ -51,12 +51,7 @@ public class MonthlyAccountBalanceService {
                                 String.format("월별 잔액 스냅샷 미존재 (period=%s, accountId=%d)",
                                         request.getMonth(), request.getAccountId())));
 
-        return new MonthlyAccountBalanceResponse(
-                balance.getOpeningBalance(),
-                balance.getDebitSum(),
-                balance.getCreditSum(),
-                balance.getClosingBalance()
-        );
+        return MonthlyAccountBalanceResponse.fromSnapshot(balance);
     }
 
     // 미마감 월: 실시간 계산
@@ -82,12 +77,7 @@ public class MonthlyAccountBalanceService {
 
         BigDecimal closingBalance = BalanceCalculator.applyNormalBalance(normalBalance, openingBalance, debit, credit);
 
-        return new MonthlyAccountBalanceResponse(
-                openingBalance,
-                debit,
-                credit,
-                closingBalance
-        );
+        return MonthlyAccountBalanceResponse.fromRealtime(openingBalance, debit, credit, closingBalance);
     }
 
     // 전기이월 계산 정책: 이전 월 마감 시 스냅샷, 미마감 시 실시간 누적

@@ -1,12 +1,13 @@
 package com.erp.erp_accounting.accounting.voucher.dto.response;
 
 import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
+import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherStatus;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherType;
+import com.erp.erp_accounting.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +15,6 @@ import java.util.List;
 
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class VoucherResponse {
     private Long voucherId;
@@ -37,4 +37,38 @@ public class VoucherResponse {
     private Long canceledBy;
     private String canceledByUsername;
     private LocalDateTime canceledAt;
+
+    public static VoucherResponse fromEntity(Voucher voucher) {
+        List<VoucherLineResponse> lines = voucher.getLines().stream()
+                .map(VoucherLineResponse::fromEntity)
+                .toList();
+
+        return VoucherResponse.builder()
+                .voucherId(voucher.getId())
+                .voucherNo(voucher.getVoucherNo())
+                .voucherDate(voucher.getVoucherDate())
+                .description(voucher.getDescription())
+                .status(voucher.getStatus())
+                .createdById(getUserId(voucher.getCreatedBy()))
+                .createdByUsername(getUsername(voucher.getCreatedBy()))
+                .lines(lines)
+                .voucherType(voucher.getVoucherType())
+                .sourceType(voucher.getSourceType())
+                .sourceId(voucher.getSourceId())
+                .approvedById(getUserId(voucher.getApprovedBy()))
+                .approvedByUsername(getUsername(voucher.getApprovedBy()))
+                .approvedAt(voucher.getApprovedAt())
+                .canceledBy(getUserId(voucher.getCanceledBy()))
+                .canceledByUsername(getUsername(voucher.getCanceledBy()))
+                .canceledAt(voucher.getCanceledAt())
+                .build();
+    }
+
+    private static Long getUserId(User user) {
+        return user != null ? user.getId() : null;
+    }
+
+    private static String getUsername(User user) {
+        return user != null ? user.getUsername() : null;
+    }
 }

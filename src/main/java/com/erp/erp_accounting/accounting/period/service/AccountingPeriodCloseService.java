@@ -75,7 +75,7 @@ public class AccountingPeriodCloseService {
         log.info("[ACCOUNTING_PERIOD] action=CLOSE_COMPLETE, period={}, closerId={}, snapshotCount={}",
                 period, closer.getId(), balances.size());
 
-        return toResponse(accountingPeriod);
+        return AccountingPeriodResponse.fromEntity(accountingPeriod);
     }
 
     // 회계기간 마감 취소
@@ -93,7 +93,7 @@ public class AccountingPeriodCloseService {
 
         log.info("[ACCOUNTING_PERIOD] action=REOPEN_COMPLETE, period={}, reopenerId={}", period, reopener.getId());
 
-        return toResponse(reopenedPeriod);
+        return AccountingPeriodResponse.fromEntity(reopenedPeriod);
     }
 
     private Map<Long, BigDecimal> loadPreviousClosingBalances(YearMonth previousPeriod) {
@@ -134,16 +134,5 @@ public class AccountingPeriodCloseService {
             throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
                     String.format("월별 잔액 불일치 (회계기간=%s, 차변 합계=%s, 대변 합계=%s)", period, totalDebit, totalCredit));
         }
-    }
-
-    private AccountingPeriodResponse toResponse(AccountingPeriod ap) {
-        return new AccountingPeriodResponse(
-                ap.getPeriod().toString(),
-                ap.getStatus().name(),
-                ap.getClosedBy() != null ? ap.getClosedBy().getUsername() : null,
-                ap.getClosedAt(),
-                ap.getReopenedBy() != null ? ap.getReopenedBy().getUsername() : null,
-                ap.getReopenedAt()
-        );
     }
 }

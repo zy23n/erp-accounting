@@ -40,7 +40,7 @@ public class VoucherApprovalService {
 
         log.info("[VOUCHER] action=APPROVE, voucherId={}, approverId={}", voucher.getId(), approver.getId());
 
-        return toResponse(voucher);
+        return VoucherApprovalResponse.fromEntity(voucher);
     }
 
     public VoucherApprovalResponse reject(Long voucherId, User approver) {
@@ -57,7 +57,7 @@ public class VoucherApprovalService {
 
         log.info("[VOUCHER] action=REJECT, voucherId={}, approverId={}", voucher.getId(), approver.getId());
 
-        return toResponse(voucher);
+        return VoucherApprovalResponse.fromEntity(voucher);
     }
 
     private Voucher findVoucher(Long voucherId) {
@@ -68,18 +68,5 @@ public class VoucherApprovalService {
 
     private void assertPeriodOpen(Voucher voucher) {
         accountingPeriodService.assertPeriodOpen(YearMonth.from(voucher.getVoucherDate()));
-    }
-
-    private VoucherApprovalResponse toResponse(Voucher voucher) {
-        return new VoucherApprovalResponse(
-                voucher.getId(),
-                voucher.getStatus().name(),
-                voucher.getApprovedBy().getId(),
-                voucher.getApprovedBy().getUsername(),
-                voucher.getApprovedAt(),
-                voucher.getVoucherType(),
-                voucher.getSourceType(),
-                voucher.getSourceId()
-        );
     }
 }
