@@ -9,6 +9,7 @@ import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.accounting.voucher.service.command.CreateVoucherCommand;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
+import com.erp.erp_accounting.hr.payroll.entity.PaymentMethod;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollItem;
@@ -42,10 +43,9 @@ public class AutoVoucherService {
         List<VoucherLineRequest> lines = new ArrayList<>();
 
         // 계정 매핑
-        Long salaryAccount = accountService.getAccountId(PayrollItem.BASE_SALARY);
-        Long allowanceAccount = accountService.getAccountId(PayrollItem.BONUS);
-        Long deductionAccount = accountService.getAccountId(PayrollItem.DEDUCTION);
-        Long cashAccount = accountService.getAccountId(PayrollItem.CASH);
+        Long salaryAccount = accountService.getAccountIdByPayrollItem(PayrollItem.BASE_SALARY);
+        Long allowanceAccount = accountService.getAccountIdByPayrollItem(PayrollItem.BONUS);
+        Long deductionAccount = accountService.getAccountIdByPayrollItem(PayrollItem.DEDUCTION);
 
         // 급여 항목별 전표 라인 생성
         for (Payroll payroll : confirm.getPayrolls()) {
@@ -55,7 +55,9 @@ public class AutoVoucherService {
             addCredit(lines, deductionAccount, payroll.getDeductionAmount());
 
             if (payroll.getNetAmount() == null) payroll.calculateNetAmount();
-            addCredit(lines, cashAccount, payroll.getNetAmount());
+
+            Long paymentAccount = accountService.getAccountIdByPaymentMethod(payroll.getPaymentMethod());
+            addCredit(lines, paymentAccount, payroll.getNetAmount());
         }
 
         // 전표 생성 DTO

@@ -5,6 +5,7 @@ import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
+import com.erp.erp_accounting.hr.payroll.entity.PaymentMethod;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,10 +59,20 @@ public class AccountService {
     }
 
     // 급여 항목 → 계정 ID 반환
-    public Long getAccountId(PayrollItem item) {
+    public Long getAccountIdByPayrollItem(PayrollItem item) {
+        if (item == null) throw new BusinessException(ErrorCode.INVALID_REQUEST, "급여 항목 미지정");
         return accountRepository.findByCode(item.getAccountCode())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
-                        String.format("급여 항목-계정 매핑 정보 미존재 (item=%s)", item)))
+                        String.format("급여 항목-계정 매핑 정보 미존재 (item=%s, code=%s)", item.name(), item.getAccountCode())))
+                .getId();
+    }
+
+    // 지급 수단 → 계정 ID 반환
+    public Long getAccountIdByPaymentMethod(PaymentMethod method) {
+        if (method == null) throw new BusinessException(ErrorCode.INVALID_REQUEST, "지급수단 미지정");
+        return accountRepository.findByCode(method.getAccountCode())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        String.format("지급 수단-계정 매핑 정보 미존재 (method=%s, code=%s)", method.name(), method.getAccountCode())))
                 .getId();
     }
 }
