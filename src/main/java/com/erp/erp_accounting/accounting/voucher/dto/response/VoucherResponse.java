@@ -4,7 +4,6 @@ import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherStatus;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherType;
-import com.erp.erp_accounting.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +11,9 @@ import lombok.Getter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.erp.erp_accounting.common.util.DtoUtils.getUserId;
+import static com.erp.erp_accounting.common.util.DtoUtils.getUsername;
 
 @Getter
 @Builder
@@ -62,13 +64,5 @@ public class VoucherResponse {
                 .canceledByUsername(getUsername(voucher.getCanceledBy()))
                 .canceledAt(voucher.getCanceledAt())
                 .build();
-    }
-
-    private static Long getUserId(User user) {
-        return user != null ? user.getId() : null;
-    }
-
-    private static String getUsername(User user) {
-        return user != null ? user.getUsername() : null;
     }
 }

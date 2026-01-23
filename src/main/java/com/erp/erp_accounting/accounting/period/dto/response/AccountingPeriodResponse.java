@@ -1,12 +1,14 @@
 package com.erp.erp_accounting.accounting.period.dto.response;
 
 import com.erp.erp_accounting.accounting.period.entity.AccountingPeriod;
-import com.erp.erp_accounting.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+
+import static com.erp.erp_accounting.common.util.DtoUtils.getUserId;
+import static com.erp.erp_accounting.common.util.DtoUtils.getUsername;
 
 @Getter
 @Builder
@@ -33,8 +35,4 @@ public class AccountingPeriodResponse {
                 .reopenedAt(ap.getReopenedAt())
                 .build();
     }
-
-    private static Long getUserId(User user) { return user != null ? user.getId() : null; }
-
-    private static String getUsername(User user) { return user != null ? user.getUsername() : null; }
 }

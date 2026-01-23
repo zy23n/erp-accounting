@@ -2,7 +2,6 @@ package com.erp.erp_accounting.hr.payroll.dto.response;
 
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirmStatus;
-import com.erp.erp_accounting.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +9,9 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+
+import static com.erp.erp_accounting.common.util.DtoUtils.getUserId;
+import static com.erp.erp_accounting.common.util.DtoUtils.getUsername;
 
 @Getter
 @Builder
@@ -46,13 +48,5 @@ public class PayrollConfirmResponse {
                 .canceledAt(confirm.getCanceledAt())
                 .payrolls(payrolls)
                 .build();
-    }
-
-    private static Long getUserId(User user) {
-        return user != null ? user.getId() : null;
-    }
-
-    private static String getUsername(User user) {
-        return user != null ? user.getUsername() : null;
     }
 }

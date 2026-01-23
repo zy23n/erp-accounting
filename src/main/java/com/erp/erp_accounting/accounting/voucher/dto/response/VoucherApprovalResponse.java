@@ -3,10 +3,12 @@ package com.erp.erp_accounting.accounting.voucher.dto.response;
 import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.entity.VoucherType;
-import com.erp.erp_accounting.user.entity.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+import static com.erp.erp_accounting.common.util.DtoUtils.getUserId;
+import static com.erp.erp_accounting.common.util.DtoUtils.getUsername;
 
 @Getter
 @Setter
@@ -35,8 +37,4 @@ public class VoucherApprovalResponse {
                 .sourceId(voucher.getSourceId())
                 .build();
     }
-
-    private static Long getUserId(User user) { return user != null ? user.getId() : null; }
-
-    private static String getUsername(User user) { return user != null ? user.getUsername() : null; }
 }
