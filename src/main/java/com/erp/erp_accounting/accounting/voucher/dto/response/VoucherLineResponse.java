@@ -4,13 +4,11 @@ import com.erp.erp_accounting.accounting.voucher.entity.VoucherLine;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class VoucherLineResponse {
     private Long id;

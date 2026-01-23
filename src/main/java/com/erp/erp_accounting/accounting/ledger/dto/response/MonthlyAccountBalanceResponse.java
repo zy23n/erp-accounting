@@ -3,12 +3,10 @@ package com.erp.erp_accounting.accounting.ledger.dto.response;
 import com.erp.erp_accounting.accounting.balance.entity.MonthlyAccountBalance;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 public class MonthlyAccountBalanceResponse {
     private BigDecimal openingBalance;

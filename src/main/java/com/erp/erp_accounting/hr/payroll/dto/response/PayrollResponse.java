@@ -17,6 +17,7 @@ public class PayrollResponse {
     private Long payrollId;
     private Long employeeId;
     private String employeeName;
+    private String empNo;
     private YearMonth payMonth;
 
     private BigDecimal baseSalary;
@@ -32,6 +33,7 @@ public class PayrollResponse {
                 .payrollId(payroll.getId())
                 .employeeId(payroll.getEmployee().getId())
                 .employeeName(payroll.getEmployee().getName())
+                .empNo(payroll.getEmployee().getEmpNo())
                 .payMonth(payroll.getPayMonth())
                 .baseSalary(payroll.getBaseSalary())
                 .allowanceAmount(payroll.getAllowanceAmount())

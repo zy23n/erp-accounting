@@ -11,7 +11,6 @@ import static com.erp.erp_accounting.common.util.DtoUtils.getUserId;
 import static com.erp.erp_accounting.common.util.DtoUtils.getUsername;
 
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 public class VoucherApprovalResponse {
