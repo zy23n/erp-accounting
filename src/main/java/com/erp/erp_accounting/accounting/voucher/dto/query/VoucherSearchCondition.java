@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Schema(description = "전표 검색 조건 DTO")
 public class VoucherSearchCondition {
 
-    @Schema(description = "전표 번호", example = "V20260115")
+    @Schema(description = "전표 번호", example = "V1769281057499")
     private String voucherNo;
 
     @Schema(description = "전표 상태", example = "APPROVED")

@@ -26,8 +26,7 @@ public class VoucherController {
     @Operation(summary = "전표 생성", description = "입력한 전표 정보와 전표 라인을 기반으로 새로운 전표를 생성합니다.")
     @PostMapping
     public ResponseEntity<Long> createVoucher(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "전표 생성 요청 정보", required = true)
-            @RequestBody @Valid VoucherCreateRequest request,
+            @Valid @RequestBody VoucherCreateRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
     ) {
         CreateVoucherCommand command = new CreateVoucherCommand(

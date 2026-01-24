@@ -2,10 +2,10 @@ package com.erp.erp_accounting.hr.payroll.repository;
 
 import com.erp.erp_accounting.common.util.QuerydslUtils;
 import com.erp.erp_accounting.hr.employee.entity.QEmployee;
-import com.erp.erp_accounting.hr.payroll.dto.query.PayrollSearchCondition;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollListResponse;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollStatus;
 import com.erp.erp_accounting.hr.payroll.entity.QPayroll;
+import com.erp.erp_accounting.hr.payroll.service.command.SearchPayrollCommand;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
@@ -30,16 +30,16 @@ public class PayrollQueryRepositoryImpl implements PayrollQueryRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<PayrollListResponse> search(PayrollSearchCondition cond, Pageable pageable) {
-        return executeQuery(null, cond, pageable);
+    public Page<PayrollListResponse> search(SearchPayrollCommand command, Pageable pageable) {
+        return executeQuery(null, command, pageable);
     }
 
     @Override
-    public Page<PayrollListResponse> searchByEmployee(Long employeeId, PayrollSearchCondition cond, Pageable pageable) {
-        return executeQuery(employeeId, cond, pageable);
+    public Page<PayrollListResponse> searchByEmployee(Long employeeId, SearchPayrollCommand command, Pageable pageable) {
+        return executeQuery(employeeId, command, pageable);
     }
 
-    private Page<PayrollListResponse> executeQuery(Long employeeId, PayrollSearchCondition cond, Pageable pageable) {
+    private Page<PayrollListResponse> executeQuery(Long employeeId, SearchPayrollCommand command, Pageable pageable) {
 
         QPayroll p = QPayroll.payroll;
         QEmployee e = QEmployee.employee;
@@ -71,13 +71,13 @@ public class PayrollQueryRepositoryImpl implements PayrollQueryRepository {
                         .join(p.employee, e)
                         .where(
                                 employeeEq(employeeId, e),
-                                empNoContains(cond.getEmpNo(), e),
-                                empNameContains(cond.getEmpName(), e),
-                                departmentEq(cond.getDepartment(), e),
-                                positionEq(cond.getPosition(), e),
-                                statusEq(cond.getStatus(), p),
-                                payMonthBetween(cond.getPayMonth(), cond.getStartPayMonth(), cond.getEndPayMonth(), p),
-                                hireDateBetween(cond.getStartHireDate(), cond.getEndHireDate(), e)
+                                empNoContains(command.getEmpNo(), e),
+                                empNameContains(command.getEmpName(), e),
+                                departmentEq(command.getDepartment(), e),
+                                positionEq(command.getPosition(), e),
+                                statusEq(command.getStatus(), p),
+                                payMonthBetween(command.getPayMonth(), command.getStartPayMonth(), command.getEndPayMonth(), p),
+                                hireDateBetween(command.getStartHireDate(), command.getEndHireDate(), e)
                         )
                         .orderBy(QuerydslUtils.toOrderSpecifiers(pageable, sortMap))
                         .offset(pageable.getOffset())
@@ -91,13 +91,13 @@ public class PayrollQueryRepositoryImpl implements PayrollQueryRepository {
                         .join(p.employee, e)
                         .where(
                                 employeeEq(employeeId, e),
-                                empNoContains(cond.getEmpNo(), e),
-                                empNameContains(cond.getEmpName(), e),
-                                departmentEq(cond.getDepartment(), e),
-                                positionEq(cond.getPosition(), e),
-                                statusEq(cond.getStatus(), p),
-                                payMonthBetween(cond.getPayMonth(), cond.getStartPayMonth(), cond.getEndPayMonth(), p),
-                                hireDateBetween(cond.getStartHireDate(), cond.getEndHireDate(), e)
+                                empNoContains(command.getEmpNo(), e),
+                                empNameContains(command.getEmpName(), e),
+                                departmentEq(command.getDepartment(), e),
+                                positionEq(command.getPosition(), e),
+                                statusEq(command.getStatus(), p),
+                                payMonthBetween(command.getPayMonth(), command.getStartPayMonth(), command.getEndPayMonth(), p),
+                                hireDateBetween(command.getStartHireDate(), command.getEndHireDate(), e)
                         )
                         .fetchOne();
 

@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/accounts")
 @RequiredArgsConstructor
-@Tag(name = "Accounts", description = "계정 관련 API")
+@Tag(name = "계정", description = "계정 관련 API")
 public class AccountController {
 
     private final AccountService accountService;

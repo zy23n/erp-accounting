@@ -2,12 +2,12 @@ package com.erp.erp_accounting.hr.payroll.service;
 
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
-import com.erp.erp_accounting.hr.payroll.dto.query.PayrollSearchCondition;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollListResponse;
 import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollQueryRepository;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
+import com.erp.erp_accounting.hr.payroll.service.command.SearchPayrollCommand;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
 import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -53,19 +53,19 @@ public class PayrollQueryService {
     }
 
     // 급여 목록 조회 (전체)
-    public Page<PayrollListResponse> searchPayrolls(UserPrincipal principal, PayrollSearchCondition condition, Pageable pageable) {
+    public Page<PayrollListResponse> searchPayrolls(UserPrincipal principal, SearchPayrollCommand command, Pageable pageable) {
 
-        validateCondition(condition);
+        validateCondition(command);
         Pageable safePageable = validateSortFields(pageable);
 
         // HR / ADMIN → 전체 조회, USER → 본인 급여만
         if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {
-            return payrollQueryRepository.search(condition, safePageable);
+            return payrollQueryRepository.search(command, safePageable);
         }
-        return payrollQueryRepository.searchByEmployee(principal.getId(), condition, safePageable);
+        return payrollQueryRepository.searchByEmployee(principal.getId(), command, safePageable);
     }
 
-    private void validateCondition(PayrollSearchCondition cond) {
+    private void validateCondition(SearchPayrollCommand cond) {
         if (cond.getPayMonth() != null && (cond.getStartPayMonth() != null || cond.getEndPayMonth() != null)) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST, "조회 조건 충돌 (payMonth, startPayMonth/endPayMonth)");
         }

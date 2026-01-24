@@ -25,7 +25,7 @@ public class VoucherResponse {
     @Schema(description = "전표 ID", example = "1")
     private Long voucherId;
 
-    @Schema(description = "전표 번호", example = "V20260115")
+    @Schema(description = "전표 번호", example = "V1769281057499")
     private String voucherNo;
 
     @Schema(description = "전표 일자", example = "2026-01-15")

@@ -15,7 +15,7 @@ public class AccountLedgerItemDto {
     @Schema(description = "전표 일자", example = "2026-01-15")
     private LocalDate voucherDate;
 
-    @Schema(description = "전표 번호", example = "V20260115")
+    @Schema(description = "전표 번호", example = "V1769281057499")
     private String voucherNo;
 
     @Schema(description = "적요", example = "급여 지급")
