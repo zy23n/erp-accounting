@@ -1,31 +1,25 @@
 package com.erp.erp_accounting.accounting.ledger.dto.request;
 
-import jakarta.validation.constraints.AssertTrue;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.YearMonth;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "월별 계정 잔액 조회 조건 DTO")
 public class MonthlyAccountBalanceRequest {
 
-    @NotNull(message = "계정과목 미입력")
+    @Schema(description = "계정 ID", required = true, example = "1")
+    @NotNull(message = "계정 미입력")
     private Long accountId;
 
-    @NotNull(message = "조회 월 미입력")
-    @DateTimeFormat(pattern = "yyyy-MM")
-    private YearMonth month;
-
-    @AssertTrue(message = "조회 월 초과")
-    public boolean isNotFutureMonth() {
-        if (month == null) return true;
-        return !month.isAfter(YearMonth.now());
-    }
+    @Schema(description = "조회 월 (yyyy-MM)", required = true, example = "2026-01")
+    @NotBlank(message = "조회 월 미입력")
+    private String month;
 }
