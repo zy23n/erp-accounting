@@ -8,7 +8,7 @@ import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollQueryRepository;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
 import com.erp.erp_accounting.hr.payroll.service.command.SearchPayrollCommand;
-import com.erp.erp_accounting.security.principal.UserPrincipal;
+import com.erp.erp_accounting.user.entity.User;
 import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,18 +34,18 @@ public class PayrollQueryService {
     );
 
     // 급여 상세 조회
-    public PayrollResponse getPayroll(Long payrollId, UserPrincipal principal) {
+    public PayrollResponse getPayroll(Long payrollId, User user) {
         Payroll payroll = payrollRepository.findById(payrollId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         String.format("급여 미존재 (payrollId=%d)", payrollId)));
 
         // HR / ADMIN은 전체 조회 가능
-        if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {
+        if (user.hasRole(UserRole.HR) || user.hasRole(UserRole.ADMIN)) {
             return PayrollResponse.fromEntity(payroll);
         }
 
         // USER는 본인 데이터만 조회 가능
-        if (!payroll.getEmployee().getId().equals(principal.getId())) {
+        if (!payroll.getEmployee().getId().equals(user.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN, "본인 급여만 조회 가능");
         }
 
@@ -53,16 +53,16 @@ public class PayrollQueryService {
     }
 
     // 급여 목록 조회 (전체)
-    public Page<PayrollListResponse> searchPayrolls(UserPrincipal principal, SearchPayrollCommand command, Pageable pageable) {
+    public Page<PayrollListResponse> searchPayrolls(User user, SearchPayrollCommand command, Pageable pageable) {
 
         validateCondition(command);
         Pageable safePageable = validateSortFields(pageable);
 
         // HR / ADMIN → 전체 조회, USER → 본인 급여만
-        if (principal.hasRole(UserRole.HR) || principal.hasRole(UserRole.ADMIN)) {
+        if (user.hasRole(UserRole.HR) || user.hasRole(UserRole.ADMIN)) {
             return payrollQueryRepository.search(command, safePageable);
         }
-        return payrollQueryRepository.searchByEmployee(principal.getId(), command, safePageable);
+        return payrollQueryRepository.searchByEmployee(user.getId(), command, safePageable);
     }
 
     private void validateCondition(SearchPayrollCommand cond) {

@@ -45,6 +45,10 @@ public class User extends BaseEntity {
         this.locked = false;
     }
 
+    public boolean hasRole(UserRole role) {
+        return roles != null && roles.contains(role);
+    }
+
     public void deactivate() {
         this.status = UserStatus.INACTIVE;
     }
