@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +32,14 @@ public class GlobalExceptionHandler {
 
         log.warn("[EXCEPTION] action=VALIDATION, errors={}", errors);
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus()).body(ErrorResponse.validation(errors));
+    }
+
+    // 잘못된 날짜 포맷
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ErrorResponse> handleDateTimeParseException(DateTimeParseException e) {
+        log.warn("[EXCEPTION] action=INVALID_DATE, message={}", e.getMessage(), e);
+        return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus())
+                .body(ErrorResponse.of(ErrorCode.INVALID_REQUEST, "잘못된 날짜 형식"));
     }
 
     // 나머지 모든 예외

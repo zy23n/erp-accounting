@@ -13,6 +13,15 @@ public class ErrorResponse {
     private final String detailMessage;
     private final List<FieldErrorResponse> errors;
 
+    public static ErrorResponse of(ErrorCode errorCode, String detailMessage) {
+        return new ErrorResponse(
+                errorCode.getCode(),
+                errorCode.getMessage(),
+                detailMessage,
+                List.of()
+        );
+    }
+
     // BusinessException 전용
     public static ErrorResponse from(BusinessException e) {
         return new ErrorResponse(
