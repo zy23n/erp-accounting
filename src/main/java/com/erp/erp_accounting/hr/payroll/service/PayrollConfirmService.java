@@ -112,6 +112,11 @@ public class PayrollConfirmService {
     private void assertConfirmAllowed(YearMonth payMonth) {
         accountingPeriodService.assertPreviousPeriodClosed(payMonth);
         accountingPeriodService.assertPeriodOpen(payMonth);
+
+        if (payMonth.isAfter(YearMonth.now())) {
+            throw new BusinessException(ErrorCode.INVALID_STATE,
+                    String.format("미래 월 급여 확정 불가 (payMonth=%s)", payMonth));
+        }
     }
 
     private void assertCancelAllowed(YearMonth payMonth) {
