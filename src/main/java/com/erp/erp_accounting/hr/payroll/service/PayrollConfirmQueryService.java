@@ -22,10 +22,10 @@ public class PayrollConfirmQueryService {
     private final PayrollConfirmRepository payrollConfirmRepository;
 
     // 단건 조회
-    public PayrollConfirmResponse getPayrollConfirm(Long payrollConfirmId) {
-        PayrollConfirm confirm = payrollConfirmRepository.findDetailById(payrollConfirmId)
+    public PayrollConfirmResponse getPayrollConfirm(Long confirmId) {
+        PayrollConfirm confirm = payrollConfirmRepository.findDetailById(confirmId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
-                        String.format("급여 확정 미존재 (confirmId=%d)", payrollConfirmId)));
+                        String.format("급여 확정 미존재 (confirmId=%d)", confirmId)));
 
         return PayrollConfirmResponse.fromEntity(confirm);
     }

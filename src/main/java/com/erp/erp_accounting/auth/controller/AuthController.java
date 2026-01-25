@@ -42,7 +42,6 @@ public class AuthController {
     @Operation(summary = "로그인", description = "아이디와 비밀번호로 로그인하고 Access Token과 Refresh Token을 발급합니다.")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-
         log.info("[AUTH] action=LOGIN_REQUEST, username={}", request.getUsername());
 
         Authentication authentication = authenticationManager.authenticate(
@@ -64,7 +63,6 @@ public class AuthController {
     @Operation(summary = "Access Token 재발급", description = "Refresh Token을 사용하여 새로운 Access Token을 발급합니다.")
     @PostMapping("/refresh")
     public ResponseEntity<RefreshTokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-
         log.info("[AUTH] action=REFRESH_TOKEN_REQUEST");
 
         // Refresh Token 검증

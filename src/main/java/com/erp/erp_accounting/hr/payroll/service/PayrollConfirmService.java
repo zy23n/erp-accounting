@@ -55,12 +55,12 @@ public class PayrollConfirmService {
     }
 
     // 급여 확정 처리 (최초 확정 + 재확정 공용)
-    public void confirm(Long payrollConfirmId, User confirmer) {
+    public void confirm(Long confirmId, User confirmer) {
 
         log.info("[PAYROLL_CONFIRM] action=PROCESS_REQUEST, payrollConfirmId={}, confirmerId={}",
-                payrollConfirmId, confirmer.getId());
+                confirmId, confirmer.getId());
 
-        PayrollConfirm confirm = findConfirm(payrollConfirmId);
+        PayrollConfirm confirm = findConfirm(confirmId);
 
         assertConfirmAllowed(confirm.getPayMonth());
 
@@ -76,16 +76,16 @@ public class PayrollConfirmService {
         autoVoucherService.createFromPayrollConfirm(confirm);
 
         log.info("[PAYROLL_CONFIRM] action=PROCESS_COMPLETE, payrollConfirmId={}, confirmerId={}, payMonth={}",
-                payrollConfirmId, confirmer.getId(), confirm.getPayMonth());
+                confirmId, confirmer.getId(), confirm.getPayMonth());
     }
 
     // 급여 확정 취소
-    public void cancel(Long payrollConfirmId, User canceler) {
+    public void cancel(Long confirmId, User canceler) {
 
         log.info("[PAYROLL_CONFIRM] action=CANCEL_REQUEST, payrollConfirmId={}, cancelerId={}",
-                payrollConfirmId, canceler.getId());
+                confirmId, canceler.getId());
 
-        PayrollConfirm confirm = findConfirm(payrollConfirmId);
+        PayrollConfirm confirm = findConfirm(confirmId);
 
         assertCancelAllowed(confirm.getPayMonth());
 
@@ -96,13 +96,13 @@ public class PayrollConfirmService {
         confirm.cancel(canceler);
 
         log.info("[PAYROLL_CONFIRM] action=CANCEL_COMPLETE, payrollConfirmId={}, cancelerId={}, payMonth={}",
-                payrollConfirmId, canceler.getId(), confirm.getPayMonth());
+                confirmId, canceler.getId(), confirm.getPayMonth());
     }
 
-    private PayrollConfirm findConfirm(Long payrollConfirmId) {
-        return payrollConfirmRepository.findById(payrollConfirmId)
+    private PayrollConfirm findConfirm(Long confirmId) {
+        return payrollConfirmRepository.findById(confirmId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
-                        String.format("급여 확정 미존재 (confirmId=%d)", payrollConfirmId)));
+                        String.format("급여 확정 미존재 (confirmId=%d)", confirmId)));
     }
 
     private void assertCreateAllowed(YearMonth payMonth) {
@@ -127,7 +127,8 @@ public class PayrollConfirmService {
         List<Payroll> payrolls = payrollRepository.findByPayMonthAndStatus(payMonth, PayrollStatus.CALCULATED);
 
         if (payrolls.isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_STATE, String.format("CALCULATED 상태 급여 미존재 (payMonth=%s)", payMonth));
+            throw new BusinessException(ErrorCode.INVALID_STATE,
+                    String.format("CALCULATED 상태 급여 미존재 (payMonth=%s)", payMonth));
         }
 
         return payrolls;

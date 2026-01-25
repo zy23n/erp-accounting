@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/ledger")
 @RequiredArgsConstructor
-@Tag(name = "계정원장", description = "계정 원장 조회 API")
+@Tag(name = "계정 원장", description = "계정 원장 조회 API")
 public class AccountLedgerController {
 
     private final AccountLedgerService accountLedgerService;

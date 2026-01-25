@@ -22,7 +22,7 @@ public class PayrollController {
 
     @Operation(summary = "급여 생성", description = "직원, 급여 월, 급여 항목 정보를 입력받아 급여를 생성하고 계산합니다.")
     @PostMapping
-    public ResponseEntity<Long> createPayroll(@RequestBody @Valid PayrollCreateRequest request) {
+    public ResponseEntity<Long> createPayroll(@Valid @RequestBody PayrollCreateRequest request) {
 
         CreatePayrollCommand command = new CreatePayrollCommand(
                 request.getEmployeeId(),
@@ -32,7 +32,6 @@ public class PayrollController {
                 request.getDeductionAmount(),
                 request.getPaymentMethod()
         );
-        command.validate();
 
         return ResponseEntity.ok(payrollService.createPayroll(command));
     }
