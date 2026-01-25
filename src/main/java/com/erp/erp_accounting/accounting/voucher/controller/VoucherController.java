@@ -5,7 +5,9 @@ import com.erp.erp_accounting.accounting.voucher.entity.SourceType;
 import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherService;
 import com.erp.erp_accounting.accounting.voucher.service.command.CreateVoucherCommand;
+import com.erp.erp_accounting.security.annotation.CurrentUser;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
+import com.erp.erp_accounting.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,8 +28,7 @@ public class VoucherController {
     @Operation(summary = "전표 생성", description = "입력한 전표 정보와 전표 라인을 기반으로 새로운 전표를 생성합니다.")
     @PostMapping
     public ResponseEntity<Long> createVoucher(
-            @Valid @RequestBody VoucherCreateRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
+            @Valid @RequestBody VoucherCreateRequest request, @CurrentUser User user
     ) {
         CreateVoucherCommand command = new CreateVoucherCommand(
                 request.getVoucherDate(),
@@ -37,7 +38,7 @@ public class VoucherController {
                 null
         );
 
-        Voucher voucher = voucherService.createVoucher(command, principal.getUser());
+        Voucher voucher = voucherService.createVoucher(command, user);
         return ResponseEntity.ok(voucher.getId());
     }
 }

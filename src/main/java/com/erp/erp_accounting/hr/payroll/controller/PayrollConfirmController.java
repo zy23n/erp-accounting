@@ -1,7 +1,8 @@
 package com.erp.erp_accounting.hr.payroll.controller;
 
 import com.erp.erp_accounting.hr.payroll.service.PayrollConfirmService;
-import com.erp.erp_accounting.security.principal.UserPrincipal;
+import com.erp.erp_accounting.security.annotation.CurrentUser;
+import com.erp.erp_accounting.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,7 +10,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
@@ -36,10 +36,9 @@ public class PayrollConfirmController {
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<Void> confirm(
             @Parameter(description = "급여 확정 ID", required = true, example = "1")
-            @PathVariable("payrollConfirmId") Long payrollConfirmId,
-            @AuthenticationPrincipal UserPrincipal principal
+            @PathVariable("payrollConfirmId") Long payrollConfirmId, @CurrentUser User user
     ) {
-        payrollConfirmService.confirm(payrollConfirmId, principal.getUser());
+        payrollConfirmService.confirm(payrollConfirmId, user);
         return ResponseEntity.ok().build();
     }
 
@@ -48,10 +47,9 @@ public class PayrollConfirmController {
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<Void> cancel(
             @Parameter(description = "급여 확정 ID", required = true, example = "1")
-            @PathVariable("payrollConfirmId") Long payrollConfirmId,
-            @AuthenticationPrincipal UserPrincipal principal
+            @PathVariable("payrollConfirmId") Long payrollConfirmId, @CurrentUser User user
     ) {
-        payrollConfirmService.cancel(payrollConfirmId, principal.getUser());
+        payrollConfirmService.cancel(payrollConfirmId, user);
         return ResponseEntity.ok().build();
     }
 }

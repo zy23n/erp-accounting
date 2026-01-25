@@ -6,6 +6,7 @@ import com.erp.erp_accounting.auth.dto.response.LoginResponse;
 import com.erp.erp_accounting.auth.dto.response.RefreshTokenResponse;
 import com.erp.erp_accounting.auth.entity.RefreshToken;
 import com.erp.erp_accounting.auth.service.RefreshTokenService;
+import com.erp.erp_accounting.security.annotation.CurrentUser;
 import com.erp.erp_accounting.security.jwt.JwtTokenProvider;
 import com.erp.erp_accounting.security.principal.UserPrincipal;
 import com.erp.erp_accounting.user.entity.User;
@@ -19,7 +20,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -82,24 +82,23 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "현재 로그인된 사용자의 특정 Refresh Token을 무효화합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequest request,
-                                    @AuthenticationPrincipal UserPrincipal principal) {
-        log.info("[AUTH] action=LOGOUT_REQUEST, userId={}", principal.getUser().getId());
+    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequest request, @CurrentUser User user) {
+        log.info("[AUTH] action=LOGOUT_REQUEST, userId={}", user.getId());
 
-        refreshTokenService.logout(request.getRefreshToken(), principal.getUser());
+        refreshTokenService.logout(request.getRefreshToken(), user);
 
-        log.info("[AUTH] action=LOGOUT_COMPLETE, userId={}", principal.getUser().getId());
+        log.info("[AUTH] action=LOGOUT_COMPLETE, userId={}", user.getId());
         return ResponseEntity.ok(Map.of("message", "로그아웃 완료"));
     }
 
     @Operation(summary = "전체 로그아웃", description = "현재 사용자와 연관된 모든 Refresh Token을 삭제하여 모든 기기에서 로그아웃합니다.")
     @PostMapping("/logout/all")
-    public ResponseEntity<?> logoutAll(@AuthenticationPrincipal UserPrincipal principal) {
-        log.info("[AUTH] action=LOGOUT_ALL_REQUEST, userId={}", principal.getUser().getId());
+    public ResponseEntity<?> logoutAll(@CurrentUser User user) {
+        log.info("[AUTH] action=LOGOUT_ALL_REQUEST, userId={}", user.getId());
 
-        refreshTokenService.deleteAllByUser(principal.getUser());
+        refreshTokenService.deleteAllByUser(user);
 
-        log.info("[AUTH] action=LOGOUT_ALL_COMPLETE, userId={}", principal.getUser().getId());
+        log.info("[AUTH] action=LOGOUT_ALL_COMPLETE, userId={}", user.getId());
         return ResponseEntity.ok(Map.of("message", "모든 기기 로그아웃 완료"));
     }
 }
