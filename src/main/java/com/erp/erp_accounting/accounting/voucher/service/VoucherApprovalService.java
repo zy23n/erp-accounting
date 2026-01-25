@@ -33,8 +33,7 @@ public class VoucherApprovalService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "전표 승인 권한 없음");
         }
 
-        assertPeriodOpen(voucher);
-
+        assertApproveAllowed(voucher);
         validator.validateForApprove(voucher);
         voucher.approve(approver);
 
@@ -51,8 +50,7 @@ public class VoucherApprovalService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "전표 반려 권한 없음");
         }
 
-        assertPeriodOpen(voucher);
-
+        assertRejectAllowed(voucher);
         voucher.reject(approver);
 
         log.info("[VOUCHER] action=REJECT, voucherId={}, approverId={}", voucher.getId(), approver.getId());
@@ -66,7 +64,14 @@ public class VoucherApprovalService {
                         String.format("전표 미존재 (voucherId=%d)", voucherId)));
     }
 
-    private void assertPeriodOpen(Voucher voucher) {
-        accountingPeriodService.assertPeriodOpen(YearMonth.from(voucher.getVoucherDate()));
+    private void assertApproveAllowed(Voucher voucher) {
+        YearMonth period = YearMonth.from(voucher.getVoucherDate());
+        accountingPeriodService.assertPeriodOpen(period);
+        accountingPeriodService.assertPreviousPeriodClosed(period);
+    }
+
+    private void assertRejectAllowed(Voucher voucher) {
+        YearMonth period = YearMonth.from(voucher.getVoucherDate());
+        accountingPeriodService.assertPeriodOpen(period);
     }
 }
