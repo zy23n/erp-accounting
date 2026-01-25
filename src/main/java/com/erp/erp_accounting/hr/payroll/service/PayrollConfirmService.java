@@ -37,7 +37,7 @@ public class PayrollConfirmService {
 
         log.info("[PAYROLL_CONFIRM] action=CREATE_REQUEST, payMonth={}", payMonth);
 
-        assertPayrollPeriodOpen(payMonth);
+        assertCreateAllowed(payMonth);
 
         if (payrollConfirmRepository.existsByPayMonth(payMonth)) {
             log.info("[PAYROLL_CONFIRM] action=DUPLICATE_DETECTED, payMonth={}", payMonth);
@@ -49,7 +49,7 @@ public class PayrollConfirmService {
         PayrollConfirm confirm = PayrollConfirm.builder().payMonth(payMonth).build();
         payrollConfirmRepository.save(confirm);
 
-        log.info("[PAYROLL_CONFIRM] action=CREATE_COMPLETE, payrollConfirmId={}, payMonth={}", confirm.getId(), confirm.getId());
+        log.info("[PAYROLL_CONFIRM] action=CREATE_COMPLETE, payrollConfirmId={}, payMonth={}", confirm.getId(), confirm.getPayMonth());
 
         return confirm.getId();
     }
@@ -62,8 +62,7 @@ public class PayrollConfirmService {
 
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
-        accountingPeriodService.assertPreviousPeriodClosed(confirm.getPayMonth());
-        assertPayrollPeriodOpen(confirm.getPayMonth());
+        assertConfirmAllowed(confirm.getPayMonth());
 
         // 해당 월의 계산 완료된 급여 조회
         List<Payroll> payrolls = getCalculatedPayrolls(confirm.getPayMonth());
@@ -88,7 +87,7 @@ public class PayrollConfirmService {
 
         PayrollConfirm confirm = findConfirm(payrollConfirmId);
 
-        assertPayrollPeriodOpen(confirm.getPayMonth());
+        assertCancelAllowed(confirm.getPayMonth());
 
         // 자동분개 전표 취소
         voucherService.cancelAutoVouchers(SourceType.PAYROLL, confirm.getId(), canceler);
@@ -106,7 +105,16 @@ public class PayrollConfirmService {
                         String.format("급여 확정 미존재 (confirmId=%d)", payrollConfirmId)));
     }
 
-    private void assertPayrollPeriodOpen(YearMonth payMonth) {
+    private void assertCreateAllowed(YearMonth payMonth) {
+        accountingPeriodService.assertPeriodOpen(payMonth);
+    }
+
+    private void assertConfirmAllowed(YearMonth payMonth) {
+        accountingPeriodService.assertPreviousPeriodClosed(payMonth);
+        accountingPeriodService.assertPeriodOpen(payMonth);
+    }
+
+    private void assertCancelAllowed(YearMonth payMonth) {
         accountingPeriodService.assertPeriodOpen(payMonth);
     }
 
