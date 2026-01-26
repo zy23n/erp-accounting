@@ -8,11 +8,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/ledger")
 @RequiredArgsConstructor
@@ -26,15 +24,6 @@ public class AccountLedgerController {
     public ResponseEntity<AccountLedgerResponse> getAccountLedger(
             @Parameter(description = "조회 조건") @Valid @ModelAttribute AccountLedgerSearchCondition condition
     ) {
-        log.info("[ACCOUNT_LEDGER] action=QUERY_REQUEST, accountId={}, startDate={}, endDate={}",
-                condition.getAccountId(), condition.getStartDateOrDefault(), condition.getEndDateOrDefault());
-
-        AccountLedgerResponse response = accountLedgerService.searchAccountLedger(condition);
-
-        log.info("[ACCOUNT_LEDGER] action=QUERY_COMPLETE, accountId={}, startDate={}, endDate={}, openingBalance={}, closingBalance={}, rows={}",
-                condition.getAccountId(), condition.getStartDateOrDefault(), condition.getEndDateOrDefault(),
-                response.getOpeningBalance(), response.getClosingBalance(), response.getItems().size());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(accountLedgerService.searchAccountLedger(condition));
     }
 }

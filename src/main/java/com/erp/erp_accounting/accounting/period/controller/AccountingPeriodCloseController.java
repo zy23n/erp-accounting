@@ -8,13 +8,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/closing")
 @RequiredArgsConstructor
@@ -29,13 +27,7 @@ public class AccountingPeriodCloseController {
             @Parameter(description = "회계기간 (yyyy-MM)", required = true, example = "2026-01")
             @PathVariable("period") String period, @CurrentUser User user
     ) {
-        log.info("[ACCOUNTING_PERIOD] action=CLOSE_REQUEST, period={}, closerId={}", period, user.getId());
-
-        AccountingPeriodResponse response = accountingPeriodCloseService.closePeriod(YearMonth.parse(period), user);
-
-        log.info("[ACCOUNTING_PERIOD] action=CLOSE_COMPLETE, period={}, closerId={}, status={}",
-                period, user.getId(), response.getStatus());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(accountingPeriodCloseService.closePeriod(YearMonth.parse(period), user));
     }
 
     @Operation(summary = "회계기간 마감 취소", description = "이미 마감된 회계기간을 다시 오픈합니다.")
@@ -44,13 +36,6 @@ public class AccountingPeriodCloseController {
             @Parameter(description = "회계기간 (yyyy-MM)", required = true, example = "2026-01")
             @PathVariable("period") String period, @CurrentUser User user
     ) {
-        log.info("[ACCOUNTING_PERIOD] action=REOPEN_REQUEST, period={}, reopenerId={}", period, user.getId());
-
-        AccountingPeriodResponse response = accountingPeriodCloseService.reopenPeriod(YearMonth.parse(period), user);
-
-        log.info("[ACCOUNTING_PERIOD] action=REOPEN_COMPLETE, period={}, reopenerId={}, status={}",
-                period, user.getId(), response.getStatus());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(accountingPeriodCloseService.reopenPeriod(YearMonth.parse(period), user));
     }
 }

@@ -8,13 +8,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/ledger")
 @RequiredArgsConstructor
@@ -28,20 +26,12 @@ public class MonthlyAccountBalanceController {
     public ResponseEntity<MonthlyAccountBalanceResponse> getMonthlyAccountBalance(
             @Valid @ModelAttribute MonthlyAccountBalanceRequest request
     ) {
-        log.info("[MONTHLY_BALANCE] action=QUERY_REQUEST, accountId={}, month={}", request.getAccountId(), request.getMonth());
-
         MonthlyAccountBalanceCommand command = new MonthlyAccountBalanceCommand(
                 request.getAccountId(),
                 YearMonth.parse(request.getMonth())
         );
         command.validate();
 
-        MonthlyAccountBalanceResponse response = monthlyAccountBalanceService.getMonthlyBalance(command);
-
-        log.info("[MONTHLY_BALANCE] action=QUERY_COMPLETE, accountId={}, month={}, openingBalance={}, totalDebit={}, totalCredit={}, closingBalance={}",
-                request.getAccountId(), request.getMonth(), response.getOpeningBalance(),
-                response.getTotalDebit(), response.getTotalCredit(), response.getClosingBalance());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(monthlyAccountBalanceService.getMonthlyBalance(command));
     }
 }

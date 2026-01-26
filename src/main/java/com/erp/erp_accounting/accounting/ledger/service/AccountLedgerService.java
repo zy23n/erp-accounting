@@ -13,6 +13,7 @@ import com.erp.erp_accounting.accounting.common.BalanceCalculator;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,6 +36,9 @@ public class AccountLedgerService {
     public AccountLedgerResponse searchAccountLedger(AccountLedgerSearchCondition condition) {
 
         validateCondition(condition);
+
+        log.info("[ACCOUNT_LEDGER] action=QUERY_REQUEST, accountId={}, startDate={}, endDate={}",
+                condition.getAccountId(), condition.getStartDateOrDefault(), condition.getEndDateOrDefault());
 
         Account account = accountRepository.findById(condition.getAccountId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
@@ -74,6 +79,9 @@ public class AccountLedgerService {
         }
 
         BigDecimal closingBalance = balance;
+
+        log.info("[ACCOUNT_LEDGER] action=QUERY_COMPLETE, accountId={}, openingBalance={}, closingBalance={}, rows={}",
+                condition.getAccountId(), openingBalance, closingBalance, items.size());
 
         return new AccountLedgerResponse(openingBalance, closingBalance, items);
     }

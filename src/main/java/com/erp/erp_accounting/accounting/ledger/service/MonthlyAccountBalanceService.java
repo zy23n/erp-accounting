@@ -36,9 +36,16 @@ public class MonthlyAccountBalanceService {
 
     public MonthlyAccountBalanceResponse getMonthlyBalance(MonthlyAccountBalanceCommand command) {
         boolean closed = accountingPeriodService.isClosed(command.getMonth());
-        log.info("[MONTHLY_BALANCE] action=QUERY, accountId={}, month={}, closed={}",
+
+        log.info("[MONTHLY_BALANCE] action=QUERY_REQUEST, accountId={}, month={}, closed={}",
                 command.getAccountId(), command.getMonth(), closed);
-        return closed ? getFromSnapshot(command) : getRealtimeBalance(command);
+
+        MonthlyAccountBalanceResponse response = closed ? getFromSnapshot(command) : getRealtimeBalance(command);
+
+        log.info("[MONTHLY_BALANCE] action=QUERY_COMPLETE, accountId={}, month={}, closingBalance={}",
+                command.getAccountId(), command.getMonth(), response.getClosingBalance());
+
+        return response;
     }
 
     // 마감 월: 스냅샷
@@ -74,6 +81,9 @@ public class MonthlyAccountBalanceService {
         BigDecimal credit = monthly.getCreditSum();
 
         BigDecimal closingBalance = BalanceCalculator.applyNormalBalance(normalBalance, openingBalance, debit, credit);
+
+        log.debug("[MONTHLY_BALANCE] action=CALC_REALTIME, accountId={}, month={}, opening={}, debit={}, credit={}, closing={}",
+                command.getAccountId(), command.getMonth(), openingBalance, debit, credit, closingBalance);
 
         return MonthlyAccountBalanceResponse.fromRealtime(openingBalance, debit, credit, closingBalance);
     }
