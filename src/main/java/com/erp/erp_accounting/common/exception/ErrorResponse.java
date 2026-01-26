@@ -8,26 +8,17 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class ErrorResponse {
-    private String code;
-    private String message;
+    private final String code;
+    private final String message;
     private final String detailMessage;
     private final List<FieldErrorResponse> errors;
-
-    public static ErrorResponse of(ErrorCode errorCode, String detailMessage) {
-        return new ErrorResponse(
-                errorCode.getCode(),
-                errorCode.getMessage(),
-                detailMessage,
-                List.of()
-        );
-    }
 
     // BusinessException 전용
     public static ErrorResponse from(BusinessException e) {
         return new ErrorResponse(
                 e.getCode(),
                 e.getErrorCode().getMessage(),
-                e.getDetailMessage(),
+                e.hasDetail() ? e.getDetailMessage() : null,
                 List.of()
         );
     }
@@ -43,11 +34,11 @@ public class ErrorResponse {
     }
 
     // 일반 Exception 전용
-    public static ErrorResponse unexpected(Exception e) {
+    public static ErrorResponse unexpected() {
         return new ErrorResponse(
                 ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
                 ErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
-                e.getMessage(),
+                null,
                 List.of()
         );
     }

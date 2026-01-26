@@ -30,4 +30,8 @@ public class BusinessException extends RuntimeException {
     public String getCode() {
         return errorCode.getCode();
     }
+
+    public boolean hasDetail() {
+        return this.detailMessage != null && !this.detailMessage.isBlank();
+    }
 }

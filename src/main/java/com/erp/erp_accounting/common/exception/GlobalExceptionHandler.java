@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
     // 비즈니스 예외
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.warn("[EXCEPTION] action=BUSINESS, code={}, message={}", e.getCode(), e.getDetailMessage(), e);
+        log.warn("[EXCEPTION] type=BUSINESS, code={}", e.getCode());
         return ResponseEntity.status(e.getStatus()).body(ErrorResponse.from(e));
     }
 
@@ -30,22 +30,22 @@ public class GlobalExceptionHandler {
                 .map(err -> FieldErrorResponse.of(err.getField(), err.getRejectedValue(), err.getDefaultMessage()))
                 .toList();
 
-        log.warn("[EXCEPTION] action=VALIDATION, errors={}", errors);
+        log.warn("[EXCEPTION] type=VALIDATION, errorCount={}", errors.size());
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus()).body(ErrorResponse.validation(errors));
     }
 
     // 잘못된 날짜 포맷
     @ExceptionHandler(DateTimeParseException.class)
     public ResponseEntity<ErrorResponse> handleDateTimeParseException(DateTimeParseException e) {
-        log.warn("[EXCEPTION] action=INVALID_DATE, message={}", e.getMessage(), e);
+        log.warn("[EXCEPTION] type=INVALID_DATE");
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus())
-                .body(ErrorResponse.of(ErrorCode.INVALID_REQUEST, "잘못된 날짜 형식"));
+                .body(ErrorResponse.from(new BusinessException(ErrorCode.INVALID_REQUEST, "잘못된 날짜 형식")));
     }
 
     // 나머지 모든 예외
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("[EXCEPTION] action=UNEXPECTED, message={}", e.getMessage(), e);
-        return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus()).body(ErrorResponse.unexpected(e));
+        log.error("[EXCEPTION] type=UNEXPECTED", e);
+        return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus()).body(ErrorResponse.unexpected());
     }
 }
