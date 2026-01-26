@@ -39,6 +39,5 @@ public class PayrollCreateRequest {
     private BigDecimal deductionAmount;
 
     @Schema(description = "지급 수단", required = true, example = "BANK_TRANSFER")
-    @NotNull(message = "지급수단 미입력")
     private PaymentMethod paymentMethod;
 }

@@ -4,6 +4,7 @@ import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.employee.entity.Employee;
 import com.erp.erp_accounting.hr.employee.repository.EmployeeRepository;
+import com.erp.erp_accounting.hr.payroll.entity.PaymentMethod;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.repository.PayrollRepository;
 import com.erp.erp_accounting.hr.payroll.service.command.CreatePayrollCommand;
@@ -37,13 +38,15 @@ public class PayrollService {
                     String.format("급여 중복 존재 (payMonth=%s, employeeId=%d)", command.getPayMonth(), command.getEmployeeId()));
         }
 
+        PaymentMethod method = command.getPaymentMethod() != null ? command.getPaymentMethod() : employee.getDefaultPaymentMethod();
+
         Payroll payroll = Payroll.builder()
                 .employee(employee)
                 .payMonth(command.getPayMonth())
                 .baseSalary(command.getBaseSalary())
                 .allowanceAmount(command.getAllowanceAmount())
                 .deductionAmount(command.getDeductionAmount())
-                .paymentMethod(command.getPaymentMethod())
+                .paymentMethod(method)
                 .build();
 
         payroll.calculateNetAmount();

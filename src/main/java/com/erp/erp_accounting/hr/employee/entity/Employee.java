@@ -1,6 +1,7 @@
 package com.erp.erp_accounting.hr.employee.entity;
 
 import com.erp.erp_accounting.common.base.BaseEntity;
+import com.erp.erp_accounting.hr.payroll.entity.PaymentMethod;
 import com.erp.erp_accounting.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,13 +36,19 @@ public class Employee extends BaseEntity {
     @Column(nullable = false)
     private String department;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "default_payment_method", nullable = false)
+    private PaymentMethod defaultPaymentMethod;
+
     @Builder
-    public Employee(String empNo, String name, LocalDate hireDate, User user, String position, String department) {
+    public Employee(String empNo, String name, LocalDate hireDate, User user, String position, String department,
+                    PaymentMethod defaultPaymentMethod) {
         this.empNo = empNo;
         this.name = name;
         this.hireDate = hireDate;
         this.user = user;
         this.position = position;
         this.department = department;
+        this.defaultPaymentMethod = defaultPaymentMethod;
     }
 }
