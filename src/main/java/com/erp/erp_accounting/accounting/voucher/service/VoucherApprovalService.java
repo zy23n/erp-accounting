@@ -66,8 +66,8 @@ public class VoucherApprovalService {
 
     private void assertApproveAllowed(Voucher voucher) {
         YearMonth period = YearMonth.from(voucher.getVoucherDate());
-        accountingPeriodService.assertPeriodOpen(period);
         accountingPeriodService.assertPreviousPeriodClosed(period);
+        accountingPeriodService.assertPeriodOpen(period);
     }
 
     private void assertRejectAllowed(Voucher voucher) {

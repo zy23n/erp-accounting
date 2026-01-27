@@ -34,12 +34,21 @@ public class AccountingPeriodService {
         return accountingPeriod;
     }
 
-    // 마감 상태 확인
-    @Cacheable(value = "accountingPeriodClosed", key = "#period")
+    // 마감 여부 확인
+    @Cacheable(value = "accountingPeriod:closed", key = "#period")
     public boolean isPeriodClosed(YearMonth period) {
         return accountingPeriodRepository.findByPeriod(period)
                 .map(AccountingPeriod::isClosed)
                 .orElse(true);
+    }
+
+    // 마감 여부 검증
+    public void assertPeriodOpen(YearMonth period) {
+        if (isPeriodClosed(period)) {
+            throw new BusinessException(
+                    ErrorCode.PERIOD_ALREADY_CLOSED, String.format("이미 마감된 회계기간 (period=%s)", period)
+            );
+        }
     }
 
     // 이전 월 마감 여부 확인
@@ -47,6 +56,7 @@ public class AccountingPeriodService {
         return isPeriodClosed(period.minusMonths(1));
     }
 
+    // 이전 월 마감 여부 검증
     public void assertPreviousPeriodClosed(YearMonth period) {
         YearMonth prev = period.minusMonths(1);
         if (!isPeriodClosed(prev)) {
@@ -67,15 +77,6 @@ public class AccountingPeriodService {
     public void createYear(int year) {
         for (int month = 1; month <= 12; month++) {
             getOrCreate(YearMonth.of(year, month));
-        }
-    }
-
-    // 마감 여부 검증 (전표/급여 확정 공용)
-    public void assertPeriodOpen(YearMonth period) {
-        if (isPeriodClosed(period)) {
-            throw new BusinessException(
-                    ErrorCode.PERIOD_ALREADY_CLOSED, String.format("이미 마감된 회계기간 (period=%s)", period)
-            );
         }
     }
 

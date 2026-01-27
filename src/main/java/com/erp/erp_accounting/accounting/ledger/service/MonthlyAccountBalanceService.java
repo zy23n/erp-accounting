@@ -35,7 +35,7 @@ public class MonthlyAccountBalanceService {
     private final MonthlyAccountBalanceRepository monthlyAccountBalanceRepository;
 
     public MonthlyAccountBalanceResponse getMonthlyBalance(MonthlyAccountBalanceCommand command) {
-        boolean closed = accountingPeriodService.isClosed(command.getMonth());
+        boolean closed = accountingPeriodService.isPeriodClosed(command.getMonth());
 
         log.info("[MONTHLY_BALANCE] action=QUERY_REQUEST, accountId={}, month={}, closed={}",
                 command.getAccountId(), command.getMonth(), closed);

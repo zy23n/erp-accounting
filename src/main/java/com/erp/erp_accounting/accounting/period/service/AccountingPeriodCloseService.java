@@ -40,7 +40,7 @@ public class AccountingPeriodCloseService {
     private final VoucherLineRepository voucherLineRepository;
 
     // 회계기간 마감
-    @CacheEvict(value = "accountingPeriodClosed", key = "#period")
+    @CacheEvict(value = "accountingPeriod:closed", key = "#period")
     public AccountingPeriodResponse closePeriod(YearMonth period, User closer) {
 
         log.info("[ACCOUNTING_PERIOD] action=CLOSE_REQUEST, period={}, closerId={}", period, closer.getId());
@@ -81,7 +81,7 @@ public class AccountingPeriodCloseService {
     }
 
     // 회계기간 마감 취소
-    @CacheEvict(value = "accountingPeriodClosed", key = "#period")
+    @CacheEvict(value = "accountingPeriod:closed", key = "#period")
     public AccountingPeriodResponse reopenPeriod(YearMonth period, User reopener) {
 
         log.info("[ACCOUNTING_PERIOD] action=REOPEN_REQUEST, period={}, reopenerId={}", period, reopener.getId());
