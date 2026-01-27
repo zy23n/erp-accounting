@@ -8,6 +8,7 @@ import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.hr.payroll.entity.PaymentMethod;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollItem;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     // 전체 트리 조회
+    @Cacheable("account:tree")
     public List<AccountTreeResponse> getAccountTree() {
         List<Account> roots = accountRepository.findRootAccounts();
         return roots.stream()
@@ -29,6 +31,7 @@ public class AccountService {
     }
 
     // leaf 계정만 조회
+    @Cacheable("account:leaf")
     public List<AccountTreeResponse> getLeafAccounts() {
         List<Account> leafAccounts = accountRepository.findLeafAccounts();
         return leafAccounts.stream()
@@ -37,6 +40,7 @@ public class AccountService {
     }
 
     // 급여 항목 → 계정 ID 반환
+    @Cacheable(value = "account:payrollItem", key = "#item", condition = "#item != null")
     public Long getAccountIdByPayrollItem(PayrollItem item) {
         if (item == null) throw new BusinessException(ErrorCode.INVALID_REQUEST, "급여 항목 미지정");
         return accountRepository.findByCode(item.getAccountCode())
@@ -46,6 +50,7 @@ public class AccountService {
     }
 
     // 지급 수단 → 계정 ID 반환
+    @Cacheable(value = "account:paymentMethod", key = "#method", condition = "#method != null")
     public Long getAccountIdByPaymentMethod(PaymentMethod method) {
         if (method == null) throw new BusinessException(ErrorCode.INVALID_REQUEST, "지급수단 미지정");
         return accountRepository.findByCode(method.getAccountCode())
