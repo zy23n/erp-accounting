@@ -6,6 +6,7 @@ import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,21 +35,21 @@ public class AccountingPeriodService {
     }
 
     // 마감 상태 확인
-    public boolean isClosed(YearMonth period) {
+    @Cacheable(value = "accountingPeriodClosed", key = "#period")
+    public boolean isPeriodClosed(YearMonth period) {
         return accountingPeriodRepository.findByPeriod(period)
-                .map(AccountingPeriod::isClosed)
-                .orElse(false);
-    }
-
-    // 이전 월 마감 여부 확인
-    public boolean isPreviousPeriodClosed(YearMonth period) {
-        return accountingPeriodRepository.findByPeriod(period.minusMonths(1))
                 .map(AccountingPeriod::isClosed)
                 .orElse(true);
     }
 
+    // 이전 월 마감 여부 확인
+    public boolean isPreviousPeriodClosed(YearMonth period) {
+        return isPeriodClosed(period.minusMonths(1));
+    }
+
     public void assertPreviousPeriodClosed(YearMonth period) {
-        if (!isPreviousPeriodClosed(period)) {
+        YearMonth prev = period.minusMonths(1);
+        if (!isPeriodClosed(prev)) {
             throw new BusinessException(ErrorCode.PERIOD_NOT_CLOSED,
                     String.format("이전 회계기간 미마감 (period=%s)", period.minusMonths(1)));
         }
@@ -71,8 +72,11 @@ public class AccountingPeriodService {
 
     // 마감 여부 검증 (전표/급여 확정 공용)
     public void assertPeriodOpen(YearMonth period) {
-        AccountingPeriod accountingPeriod = getByPeriod(period);
-        validator.assertNotClosed(accountingPeriod);
+        if (isPeriodClosed(period)) {
+            throw new BusinessException(
+                    ErrorCode.PERIOD_ALREADY_CLOSED, String.format("이미 마감된 회계기간 (period=%s)", period)
+            );
+        }
     }
 
     @Transactional

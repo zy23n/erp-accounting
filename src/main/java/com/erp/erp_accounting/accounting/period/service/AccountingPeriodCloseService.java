@@ -15,6 +15,7 @@ import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class AccountingPeriodCloseService {
     private final VoucherLineRepository voucherLineRepository;
 
     // 회계기간 마감
+    @CacheEvict(value = "accountingPeriodClosed", key = "#period")
     public AccountingPeriodResponse closePeriod(YearMonth period, User closer) {
 
         log.info("[ACCOUNTING_PERIOD] action=CLOSE_REQUEST, period={}, closerId={}", period, closer.getId());
@@ -79,6 +81,7 @@ public class AccountingPeriodCloseService {
     }
 
     // 회계기간 마감 취소
+    @CacheEvict(value = "accountingPeriodClosed", key = "#period")
     public AccountingPeriodResponse reopenPeriod(YearMonth period, User reopener) {
 
         log.info("[ACCOUNTING_PERIOD] action=REOPEN_REQUEST, period={}, reopenerId={}", period, reopener.getId());
