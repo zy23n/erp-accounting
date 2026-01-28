@@ -10,8 +10,6 @@ import com.erp.erp_accounting.accounting.balance.service.MonthlyBalanceCalculati
 import com.erp.erp_accounting.accounting.period.dto.response.AccountingPeriodResponse;
 import com.erp.erp_accounting.accounting.period.entity.AccountingPeriod;
 import com.erp.erp_accounting.accounting.voucher.entity.LineType;
-import com.erp.erp_accounting.common.exception.BusinessException;
-import com.erp.erp_accounting.common.exception.ErrorCode;
 import com.erp.erp_accounting.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -60,7 +57,7 @@ public class AccountingPeriodCloseService {
         Map<Long, BigDecimal> creditSums = loadMonthlySums(period, LineType.CREDIT);
 
         // 대차검증
-        validateMonthlyTrialBalance(debitSums, creditSums, period);
+        balanceCalculationService.validateMonthlyTrialBalance(debitSums, creditSums, period);
 
         // 월별 잔액 스냅샷 계산
         List<MonthlyAccountBalance> balances =
@@ -120,22 +117,5 @@ public class AccountingPeriodCloseService {
                         AccountAmountDto::getAccountId,
                         AccountAmountDto::getAmount
                 ));
-    }
-
-    private void validateMonthlyTrialBalance(
-            Map<Long, BigDecimal> debitSums, Map<Long, BigDecimal> creditSums, YearMonth period
-    ) {
-        BigDecimal totalDebit = debitSums.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
-
-        BigDecimal totalCredit = creditSums.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
-
-        if (totalDebit.compareTo(totalCredit) != 0) {
-            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
-                    String.format("월별 잔액 불일치 (회계기간=%s, 차변 합계=%s, 대변 합계=%s)", period, totalDebit, totalCredit));
-        }
     }
 }

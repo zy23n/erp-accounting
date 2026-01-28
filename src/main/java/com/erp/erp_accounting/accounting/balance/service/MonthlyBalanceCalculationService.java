@@ -4,10 +4,13 @@ import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.entity.NormalBalance;
 import com.erp.erp_accounting.accounting.balance.entity.MonthlyAccountBalance;
 import com.erp.erp_accounting.accounting.common.BalanceCalculator;
+import com.erp.erp_accounting.common.exception.BusinessException;
+import com.erp.erp_accounting.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,5 +80,25 @@ public class MonthlyBalanceCalculationService {
             BigDecimal credit
     ) {
         return BalanceCalculator.applyNormalBalance(normalBalance, opening, debit, credit);
+    }
+
+    // 대차검증
+    public void validateMonthlyTrialBalance(
+            Map<Long, BigDecimal> debitSums,
+            Map<Long, BigDecimal> creditSums,
+            YearMonth period
+    ) {
+        BigDecimal totalDebit = debitSums.values().stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal totalCredit = creditSums.values().stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        if (totalDebit.compareTo(totalCredit) != 0) {
+            throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
+                    String.format("월별 잔액 불일치 (회계기간=%s, 차변 합계=%s, 대변 합계=%s)", period, totalDebit, totalCredit));
+        }
     }
 }
