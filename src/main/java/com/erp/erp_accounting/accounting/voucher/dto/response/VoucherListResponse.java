@@ -41,10 +41,10 @@ public class VoucherListResponse {
     private String createdByUsername;
 
     @Schema(description = "차변 합계", example = "15000")
-    private BigDecimal debitSum;
+    private BigDecimal totalDebit;
 
     @Schema(description = "대변 합계", example = "15000")
-    private BigDecimal creditSum;
+    private BigDecimal totalCredit;
 
     @Schema(description = "작성 일시")
     private LocalDateTime createdAt;
@@ -64,8 +64,8 @@ public class VoucherListResponse {
             String description,
             Long createdById,
             String createdByUsername,
-            BigDecimal debitSum,
-            BigDecimal creditSum,
+            BigDecimal totalDebit,
+            BigDecimal totalCredit,
             LocalDateTime createdAt,
             VoucherType voucherType,
             SourceType sourceType
@@ -77,8 +77,8 @@ public class VoucherListResponse {
         this.description = description;
         this.createdById = createdById;
         this.createdByUsername = createdByUsername;
-        this.debitSum = debitSum;
-        this.creditSum = creditSum;
+        this.totalDebit = totalDebit;
+        this.totalCredit = totalCredit;
         this.createdAt = createdAt;
         this.voucherType = voucherType;
         this.sourceType = sourceType;
