@@ -5,11 +5,11 @@ import com.erp.erp_accounting.accounting.account.entity.NormalBalance;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
 import com.erp.erp_accounting.accounting.balance.entity.MonthlyAccountBalance;
 import com.erp.erp_accounting.accounting.balance.repository.MonthlyAccountBalanceRepository;
+import com.erp.erp_accounting.accounting.balance.service.MonthlyBalanceCalculationService;
 import com.erp.erp_accounting.accounting.ledger.dto.query.MonthlyBalanceQueryDto;
 import com.erp.erp_accounting.accounting.ledger.dto.query.OpeningBalanceDto;
 import com.erp.erp_accounting.accounting.ledger.dto.response.MonthlyAccountBalanceResponse;
 import com.erp.erp_accounting.accounting.ledger.repository.VoucherLineRepository;
-import com.erp.erp_accounting.accounting.common.BalanceCalculator;
 import com.erp.erp_accounting.accounting.ledger.service.command.MonthlyAccountBalanceCommand;
 import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
 import com.erp.erp_accounting.common.exception.BusinessException;
@@ -33,6 +33,7 @@ public class MonthlyAccountBalanceService {
     private final AccountRepository accountRepository;
     private final AccountingPeriodService accountingPeriodService;
     private final MonthlyAccountBalanceRepository monthlyAccountBalanceRepository;
+    private final MonthlyBalanceCalculationService balanceCalculationService;
 
     public MonthlyAccountBalanceResponse getMonthlyBalance(MonthlyAccountBalanceCommand command) {
         boolean closed = accountingPeriodService.isPeriodClosed(command.getMonth());
@@ -80,7 +81,7 @@ public class MonthlyAccountBalanceService {
         BigDecimal debit = monthly.getDebitSum();
         BigDecimal credit = monthly.getCreditSum();
 
-        BigDecimal closingBalance = BalanceCalculator.applyNormalBalance(normalBalance, openingBalance, debit, credit);
+        BigDecimal closingBalance = balanceCalculationService.calculateClosingBalance(normalBalance, openingBalance, debit, credit);
 
         log.debug("[MONTHLY_BALANCE] action=CALC_REALTIME, accountId={}, month={}, opening={}, debit={}, credit={}, closing={}",
                 command.getAccountId(), command.getMonth(), openingBalance, debit, credit, closingBalance);
@@ -104,10 +105,7 @@ public class MonthlyAccountBalanceService {
 
     private BigDecimal calculateRealtimeOpeningBalance(YearMonth month, Long accountId, NormalBalance normalBalance) {
         LocalDate monthStart = month.atDay(1);
-
         OpeningBalanceDto opening = voucherLineRepository.findOpeningBalance(accountId, monthStart);
-
-        return BalanceCalculator.applyNormalBalance(
-                normalBalance, BigDecimal.ZERO, opening.getDebitSum(), opening.getCreditSum());
+        return balanceCalculationService.calculateOpeningBalance(normalBalance, opening.getDebitSum(), opening.getCreditSum());
     }
 }

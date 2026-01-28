@@ -1,6 +1,7 @@
 package com.erp.erp_accounting.accounting.balance.service;
 
 import com.erp.erp_accounting.accounting.account.entity.Account;
+import com.erp.erp_accounting.accounting.account.entity.NormalBalance;
 import com.erp.erp_accounting.accounting.balance.entity.MonthlyAccountBalance;
 import com.erp.erp_accounting.accounting.common.BalanceCalculator;
 import lombok.RequiredArgsConstructor;
@@ -57,5 +58,24 @@ public class MonthlyBalanceCalculationService {
 
     private boolean isZero(BigDecimal value) {
         return value == null || value.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    // 전기이월
+    public BigDecimal calculateOpeningBalance(
+            NormalBalance normalBalance,
+            BigDecimal debit,
+            BigDecimal credit
+    ) {
+        return BalanceCalculator.applyNormalBalance(normalBalance, BigDecimal.ZERO, debit, credit);
+    }
+
+    // 기말잔액
+    public BigDecimal calculateClosingBalance(
+            NormalBalance normalBalance,
+            BigDecimal opening,
+            BigDecimal debit,
+            BigDecimal credit
+    ) {
+        return BalanceCalculator.applyNormalBalance(normalBalance, opening, debit, credit);
     }
 }
