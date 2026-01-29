@@ -90,7 +90,7 @@ public class PayrollConfirmService {
         assertCancelAllowed(confirm.getPayMonth());
 
         // 자동분개 전표 취소
-        voucherService.cancelAutoVouchers(SourceType.PAYROLL, confirm.getId(), canceler);
+        autoVoucherService.cancelAutoVouchersBySource(SourceType.PAYROLL, confirm.getId(), canceler);
 
         // 급여 확정 취소
         confirm.cancel(canceler);

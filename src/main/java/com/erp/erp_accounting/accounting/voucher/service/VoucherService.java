@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -66,40 +65,6 @@ public class VoucherService {
                 voucher.getId(), voucher.getVoucherNo(), voucher.getSourceType(), voucher.getSourceId(), user.getId());
 
         return voucher;
-    }
-
-    public Long createAndAutoApprove(CreateVoucherCommand command, User user) {
-
-        log.info("[VOUCHER] action=CREATE_AND_AUTO_APPROVE_REQUEST, sourceType={}, sourceId={}, userId={}",
-                command.getSourceType(), command.getSourceId(), user.getId());
-
-        Voucher voucher = createVoucher(command, user);
-        voucher.approve(voucher.getCreatedBy());
-
-        log.info("[VOUCHER] action=CREATE_AND_AUTO_APPROVE_COMPLETE, voucherId={}, voucherNo={}, userId={}",
-                voucher.getId(), voucher.getVoucherNo(), user.getId());
-
-        return voucher.getId();
-    }
-
-    public void cancelAutoVouchers(SourceType sourceType, Long sourceId, User canceler) {
-
-        List<Voucher> vouchers = voucherRepository.findBySourceTypeAndSourceId(sourceType, sourceId);
-        if (vouchers.isEmpty()) return;
-
-        log.info("[VOUCHER] action=AUTO_CANCEL_REQUEST, sourceType={}, sourceId={}, cancelerId={}",
-                sourceType, sourceId, canceler.getId());
-
-        assertVoucherPeriodOpen(vouchers.get(0).getVoucherDate());
-
-        for (Voucher voucher : vouchers) {
-            if (voucher.isCancelable()) {
-                voucher.cancel(canceler);
-            }
-        }
-
-        log.warn("[VOUCHER] action=AUTO_CANCEL_COMPLETE, sourceType={}, sourceId={}, cancelerId={}",
-                sourceType, sourceId, canceler.getId());
     }
 
     private void assertVoucherPeriodOpen(LocalDate voucherDate) {
