@@ -46,25 +46,8 @@ public class AutoVoucherService {
             throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE, "급여 확정 전표 중복 생성");
         }
 
-        List<VoucherLineRequest> lines = new ArrayList<>();
-
-        // 계정 매핑
-        Long salaryAccount = accountService.getAccountIdByPayrollItem(PayrollItem.BASE_SALARY);
-        Long allowanceAccount = accountService.getAccountIdByPayrollItem(PayrollItem.BONUS);
-        Long deductionAccount = accountService.getAccountIdByPayrollItem(PayrollItem.DEDUCTION);
-
-        // 급여 항목별 전표 라인 생성
-        for (Payroll payroll : confirm.getPayrolls()) {
-
-            addDebit(lines, salaryAccount, payroll.getBaseSalary());
-            addDebit(lines, allowanceAccount, payroll.getAllowanceAmount());
-            addCredit(lines, deductionAccount, payroll.getDeductionAmount());
-
-            if (payroll.getNetAmount() == null) payroll.calculateNetAmount();
-
-            Long paymentAccount = accountService.getAccountIdByPaymentMethod(payroll.getPaymentMethod());
-            addCredit(lines, paymentAccount, payroll.getNetAmount());
-        }
+        // 전표 라인 생성
+        List<VoucherLineRequest> lines = buildVoucherLines(confirm);
 
         // 전표 생성 DTO
         LocalDate voucherDate = confirm.getPayMonth().atEndOfMonth();
@@ -107,6 +90,31 @@ public class AutoVoucherService {
                 sourceType, sourceId, canceler.getId());
     }
 
+        private List<VoucherLineRequest> buildVoucherLines(PayrollConfirm confirm) {
+
+            List<VoucherLineRequest> lines = new ArrayList<>();
+
+            // 계정 매핑
+            Long salaryAccount = accountService.getAccountIdByPayrollItem(PayrollItem.BASE_SALARY);
+            Long allowanceAccount = accountService.getAccountIdByPayrollItem(PayrollItem.BONUS);
+            Long deductionAccount = accountService.getAccountIdByPayrollItem(PayrollItem.DEDUCTION);
+
+            // 급여 항목별 전표 라인 생성
+            for (Payroll payroll : confirm.getPayrolls()) {
+
+                addDebit(lines, salaryAccount, payroll.getBaseSalary());
+                addDebit(lines, allowanceAccount, payroll.getAllowanceAmount());
+                addCredit(lines, deductionAccount, payroll.getDeductionAmount());
+
+                if (payroll.getNetAmount() == null) payroll.calculateNetAmount();
+
+                Long paymentAccount = accountService.getAccountIdByPaymentMethod(payroll.getPaymentMethod());
+                addCredit(lines, paymentAccount, payroll.getNetAmount());
+            }
+
+            return lines;
+        }
+
     private void addDebit(List<VoucherLineRequest> lines, Long accountId, BigDecimal amount) {
         if (amount.signum() > 0) {
             lines.add(new VoucherLineRequest(accountId, LineType.DEBIT, amount));
@@ -121,5 +129,4 @@ public class AutoVoucherService {
     private void assertVoucherPeriodOpen(LocalDate voucherDate) {
         accountingPeriodService.assertPeriodOpen(YearMonth.from(voucherDate));
     }
-
 }
