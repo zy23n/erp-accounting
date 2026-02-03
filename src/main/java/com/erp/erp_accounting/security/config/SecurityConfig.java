@@ -76,31 +76,30 @@ public class SecurityConfig {
 
                 // 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
-                                .requestMatchers("/api/auth/logout/**").authenticated()
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/api/closing/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/logout/**").authenticated()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                                // ACCOUNTING
-                                .requestMatchers(HttpMethod.GET, ApiRoles.ACCOUNTING_APIS).hasAnyRole("ACCOUNTING", "ADMIN")
+                        // ADMIN
+                        .requestMatchers(ApiRoles.ADMIN_APIS).hasRole("ADMIN")
 
-                                // ACCOUNTING
-                                .requestMatchers(HttpMethod.POST, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
-                                .requestMatchers(HttpMethod.PATCH, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
-                                .requestMatchers(HttpMethod.PUT, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
-                                .requestMatchers(HttpMethod.DELETE, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
+                        // ACCOUNTING
+                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").hasAnyRole("USER", "ACCOUNTING", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/accounts/**", "/api/ledger/**").hasAnyRole("ACCOUNTING", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/**").hasAnyRole("USER", "ACCOUNTING")
+                        .requestMatchers(HttpMethod.POST, "/api/accounts/**", "/api/ledger/**").hasRole("ACCOUNTING")
+                        .requestMatchers(HttpMethod.PATCH, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
+                        .requestMatchers(HttpMethod.PUT, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
+                        .requestMatchers(HttpMethod.DELETE, ApiRoles.ACCOUNTING_APIS).hasRole("ACCOUNTING")
 
-                                // HR
-                                .requestMatchers(HttpMethod.GET, ApiRoles.HR_APIS).authenticated()
+                        // HR
+                        .requestMatchers(HttpMethod.GET, ApiRoles.HR_APIS).authenticated()
+                        .requestMatchers(HttpMethod.POST, ApiRoles.HR_APIS).hasRole("HR")
+                        .requestMatchers(HttpMethod.PATCH, ApiRoles.HR_APIS).hasRole("HR")
+                        .requestMatchers(HttpMethod.PUT, ApiRoles.HR_APIS).hasRole("HR")
+                        .requestMatchers(HttpMethod.DELETE, ApiRoles.HR_APIS).hasRole("HR")
 
-                                // HR
-                                .requestMatchers(HttpMethod.POST, ApiRoles.HR_APIS).hasRole("HR")
-                                .requestMatchers(HttpMethod.PATCH, ApiRoles.HR_APIS).hasRole("HR")
-                                .requestMatchers(HttpMethod.PUT, ApiRoles.HR_APIS).hasRole("HR")
-                                .requestMatchers(HttpMethod.DELETE, ApiRoles.HR_APIS).hasRole("HR")
-
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
 
                 // JWT 필터 등록
