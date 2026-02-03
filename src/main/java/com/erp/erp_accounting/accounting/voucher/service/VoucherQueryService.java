@@ -8,6 +8,9 @@ import com.erp.erp_accounting.accounting.voucher.repository.VoucherQueryReposito
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
+import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
+import com.erp.erp_accounting.user.entity.User;
+import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,20 +34,35 @@ public class VoucherQueryService {
             "voucherDate", "voucherNo", "createdAt", "voucherType", "sourceType"
     );
 
-    // 단건 조회
-    public VoucherResponse getVoucher(Long voucherId) {
+    // 전표 상세 조회
+    public VoucherResponse getVoucher(Long voucherId, User user) {
         Voucher voucher = voucherRepository.findWithLinesById(voucherId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         String.format("전표 미존재 (voucherId=%d)", voucherId)));
 
+        // ACCOUNTING / ADMIN은 전체 조회 가능
+        if (user.hasRole(UserRole.ACCOUNTING) || user.hasRole(UserRole.ADMIN)) {
+            return VoucherResponse.fromEntity(voucher);
+        }
+
+        // USER는 본인 데이터만 조회 가능
+        if (!voucher.getCreatedBy().getId().equals(user.getId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "본인 전표만 조회 가능");
+        }
+
         return VoucherResponse.fromEntity(voucher);
     }
 
-    // 목록 조회 (QueryDSL)
-    public Page<VoucherListResponse> searchVouchers(VoucherSearchCondition condition, Pageable pageable) {
+    // 전표 목록 조회 (QueryDSL)
+    public Page<VoucherListResponse> searchVouchers(User user, VoucherSearchCondition condition, Pageable pageable) {
         validateCondition(condition);
         Pageable safePageable = validateSortFields(pageable);
-        return voucherQueryRepository.search(condition, safePageable);
+
+        // ACCOUNTING / ADMIN → 전체 조회, USER → 본인 전표만
+        if (user.hasRole(UserRole.ACCOUNTING) || user.hasRole(UserRole.ADMIN)) {
+            return voucherQueryRepository.search(condition, safePageable);
+        }
+        return voucherQueryRepository.searchByCreator(user.getId(), condition, safePageable);
     }
 
     private void validateCondition(VoucherSearchCondition cond) {

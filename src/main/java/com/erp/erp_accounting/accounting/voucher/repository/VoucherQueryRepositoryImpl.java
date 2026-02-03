@@ -33,6 +33,15 @@ public class VoucherQueryRepositoryImpl implements VoucherQueryRepository {
 
     @Override
     public Page<VoucherListResponse> search(VoucherSearchCondition cond, Pageable pageable) {
+        return executeQuery(null, cond, pageable);
+    }
+
+    @Override
+    public Page<VoucherListResponse> searchByCreator(Long creatorId, VoucherSearchCondition cond, Pageable pageable) {
+        return executeQuery(creatorId, cond, pageable);
+    }
+
+    private Page<VoucherListResponse> executeQuery(Long creatorId, VoucherSearchCondition cond, Pageable pageable) {
 
         QVoucher v = QVoucher.voucher;
         QVoucherLine l = QVoucherLine.voucherLine;
@@ -81,6 +90,7 @@ public class VoucherQueryRepositoryImpl implements VoucherQueryRepository {
                     .join(v.createdBy, u)
                     .leftJoin(v.lines, l)
                     .where(
+                            creatorEq(creatorId, v),
                             voucherNoContains(cond.getVoucherNo(), v),
                             statusEq(cond.getStatus(), v),
                             voucherTypeEq(cond.getVoucherType(), v),
@@ -110,6 +120,7 @@ public class VoucherQueryRepositoryImpl implements VoucherQueryRepository {
                     .select(v.countDistinct())
                     .from(v)
                     .where(
+                            creatorEq(creatorId, v),
                             voucherNoContains(cond.getVoucherNo(), v),
                             statusEq(cond.getStatus(), v),
                             voucherTypeEq(cond.getVoucherType(), v),
@@ -123,6 +134,10 @@ public class VoucherQueryRepositoryImpl implements VoucherQueryRepository {
     }
 
     /* ===== 조건 메서드 ===== */
+    private BooleanExpression creatorEq(Long creatorId, QVoucher v) {
+        return creatorId != null ? v.createdBy.id.eq(creatorId) : null;
+    }
+
     private BooleanExpression voucherNoContains(String voucherNo, QVoucher v) {
         return hasText(voucherNo) ? v.voucherNo.contains(voucherNo) : null;
     }

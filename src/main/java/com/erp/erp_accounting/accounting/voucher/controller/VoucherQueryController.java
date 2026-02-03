@@ -4,6 +4,8 @@ import com.erp.erp_accounting.accounting.voucher.dto.query.VoucherSearchConditio
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherListResponse;
 import com.erp.erp_accounting.accounting.voucher.dto.response.VoucherResponse;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherQueryService;
+import com.erp.erp_accounting.security.annotation.CurrentUser;
+import com.erp.erp_accounting.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,16 +27,19 @@ public class VoucherQueryController {
     @GetMapping("/{voucherId}")
     public ResponseEntity<VoucherResponse> getVoucher(
             @Parameter(description = "전표 ID", required = true, example = "1")
-            @PathVariable("voucherId") Long voucherId) {
-        return ResponseEntity.ok(voucherQueryService.getVoucher(voucherId));
+            @PathVariable("voucherId") Long voucherId,
+            @CurrentUser User user
+    ) {
+        return ResponseEntity.ok(voucherQueryService.getVoucher(voucherId, user));
     }
 
     @Operation(summary = "전표 목록 조회", description = "검색 조건과 페이징 정보를 기반으로 전표 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<Page<VoucherListResponse>> getVoucherList(
+            @CurrentUser User user,
             @Parameter(description = "전표 검색 조건") @ModelAttribute VoucherSearchCondition condition,
             @Parameter(hidden = true) Pageable pageable
     ) {
-        return ResponseEntity.ok(voucherQueryService.searchVouchers(condition, pageable));
+        return ResponseEntity.ok(voucherQueryService.searchVouchers(user, condition, pageable));
     }
 }

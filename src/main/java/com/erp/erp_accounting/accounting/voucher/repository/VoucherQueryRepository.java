@@ -6,5 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface VoucherQueryRepository {
+
     Page<VoucherListResponse> search(VoucherSearchCondition condition, Pageable pageable);
+
+    Page<VoucherListResponse> searchByCreator(Long creatorId, VoucherSearchCondition condition, Pageable pageable);
 }
