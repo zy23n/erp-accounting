@@ -2,12 +2,14 @@ package com.erp.erp_accounting.hr.payroll.service.command;
 
 import com.erp.erp_accounting.hr.payroll.entity.PayrollStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class SearchPayrollCommand {
     private String empNo;

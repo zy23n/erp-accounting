@@ -50,12 +50,12 @@ public class PayrollService {
                 .build();
 
         payroll.calculateNetAmount();
-        payrollRepository.save(payroll);
+        Payroll savedPayroll = payrollRepository.save(payroll);
 
         log.info("[PAYROLL] action=CREATE_COMPLETE, payrollId={}, employeeId={}, payMonth={}",
                 payroll.getId(), command.getEmployeeId(), command.getPayMonth());
 
-        return payroll.getId();
+        return savedPayroll.getId();
     }
 }
 

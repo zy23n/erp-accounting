@@ -47,11 +47,11 @@ public class PayrollConfirmService {
         getCalculatedPayrolls(payMonth); // 해당 월의 계산 완료된 급여 유무 검증
 
         PayrollConfirm confirm = PayrollConfirm.builder().payMonth(payMonth).build();
-        payrollConfirmRepository.save(confirm);
+        PayrollConfirm savedConfirm = payrollConfirmRepository.save(confirm);
 
         log.info("[PAYROLL_CONFIRM] action=CREATE_COMPLETE, payrollConfirmId={}, payMonth={}", confirm.getId(), confirm.getPayMonth());
 
-        return confirm.getId();
+        return savedConfirm.getId();
     }
 
     // 급여 확정 처리 (최초 확정 + 재확정 공용)
@@ -72,8 +72,13 @@ public class PayrollConfirmService {
         payrolls.forEach(confirm::addPayroll);
 
         // 급여 확정 + 자동분개
-        confirm.confirm(confirmer);
-        autoVoucherService.createFromPayrollConfirm(confirm);
+        try {
+            confirm.confirm(confirmer);
+            autoVoucherService.createFromPayrollConfirm(confirm);
+        } catch (RuntimeException e) {
+            confirm.rollbackToCreated(); // 명시적 롤백
+            throw e;
+        }
 
         log.info("[PAYROLL_CONFIRM] action=PROCESS_COMPLETE, payrollConfirmId={}, confirmerId={}, payMonth={}",
                 confirmId, confirmer.getId(), confirm.getPayMonth());

@@ -108,6 +108,13 @@ public class PayrollConfirm extends BaseEntity {
         this.clearPayrolls();
     }
 
+    public void rollbackToCreated() {
+        this.status = PayrollConfirmStatus.CREATED;
+        this.confirmedBy = null;
+        this.confirmedAt = null;
+        this.payrolls.forEach(Payroll::rollbackToCalculated);
+    }
+
     @Builder
     public PayrollConfirm(YearMonth payMonth) {
         this.payMonth = payMonth;
