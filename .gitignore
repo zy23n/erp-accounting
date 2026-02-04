@@ -45,4 +45,5 @@ application.yaml
 /src/main/java/com/erp/erp_accounting/data/
 
 # QueryDSL generated sources
-src/main/generated/
+/build/
+/build/generated/
