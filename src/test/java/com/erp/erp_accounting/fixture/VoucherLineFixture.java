@@ -19,6 +19,16 @@ public class VoucherLineFixture {
         voucher.addLine(creditLine(AccountFixture.revenue(), 500));
     }
 
+    public static void addBalancedLines(Voucher voucher, Account debitAccount, Account creditAccount) {
+        voucher.addLine(debitLine(debitAccount, 1_000));
+        voucher.addLine(creditLine(creditAccount, 1_000));
+    }
+
+    public static void addUnbalancedLines(Voucher voucher, Account debitAccount, Account creditAccount) {
+        voucher.addLine(debitLine(debitAccount, 1_000));
+        voucher.addLine(creditLine(creditAccount, 500));
+    }
+
     private static VoucherLine debitLine(Account account, int amount) {
         return VoucherLine.builder()
                 .account(account)
@@ -33,5 +43,21 @@ public class VoucherLineFixture {
                 .type(LineType.CREDIT)
                 .amount(BigDecimal.valueOf(amount))
                 .build();
+    }
+
+    public static void addDebitOnly(Voucher voucher, Account debitAccount, BigDecimal amount) {
+        voucher.addLine(VoucherLine.builder()
+                .account(debitAccount)
+                .type(LineType.DEBIT)
+                .amount(amount)
+                .build());
+    }
+
+    public static void addCreditOnly(Voucher voucher, Account creditAccount, BigDecimal amount) {
+        voucher.addLine(VoucherLine.builder()
+                .account(creditAccount)
+                .type(LineType.CREDIT)
+                .amount(amount)
+                .build());
     }
 }
