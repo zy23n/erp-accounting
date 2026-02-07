@@ -75,6 +75,7 @@ class AccountingPeriodCloseServiceTest {
         // then
         verify(accountingPeriodService).close(PERIOD, closer);
         verify(monthlyAccountBalanceRepository).deleteByPeriod(PERIOD);
+        verify(balanceCalculationService).validateMonthlyTrialBalance(any(), any(), eq(PERIOD));
 
         assertThat(response.getPeriod()).isEqualTo(PERIOD.toString());
     }
