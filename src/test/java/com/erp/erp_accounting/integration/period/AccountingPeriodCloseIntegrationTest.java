@@ -2,6 +2,7 @@ package com.erp.erp_accounting.integration.period;
 
 import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.accounting.account.repository.AccountRepository;
+import com.erp.erp_accounting.accounting.balance.entity.MonthlyAccountBalance;
 import com.erp.erp_accounting.accounting.balance.repository.MonthlyAccountBalanceRepository;
 import com.erp.erp_accounting.accounting.period.entity.AccountingPeriod;
 import com.erp.erp_accounting.accounting.period.repository.AccountingPeriodRepository;
@@ -26,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -86,7 +89,15 @@ public class AccountingPeriodCloseIntegrationTest {
 
         assertTrue(period.isClosed());
         assertEquals(adminUser.getId(), period.getClosedBy().getId());
-        assertFalse(monthlyAccountBalanceRepository.findByPeriod(PERIOD).isEmpty());
+
+        List<MonthlyAccountBalance> balances = monthlyAccountBalanceRepository.findByPeriod(PERIOD);
+
+        MonthlyAccountBalance cashBalance = balances.stream()
+                .filter(b -> b.getAccount().getId().equals(cash.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(cashBalance.getClosingBalance()).isEqualByComparingTo("1000");
     }
 
     @Test

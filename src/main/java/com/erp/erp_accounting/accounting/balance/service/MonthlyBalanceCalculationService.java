@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,12 +88,10 @@ public class MonthlyBalanceCalculationService {
             YearMonth period
     ) {
         BigDecimal totalDebit = debitSums.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalCredit = creditSums.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (totalDebit.compareTo(totalCredit) != 0) {
             throw new BusinessException(ErrorCode.IMBALANCE_AMOUNT,
