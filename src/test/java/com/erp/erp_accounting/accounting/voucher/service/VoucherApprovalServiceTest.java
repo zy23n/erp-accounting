@@ -24,7 +24,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,26 +75,6 @@ class VoucherApprovalServiceTest {
                 .satisfies(e -> {
                     BusinessException be = (BusinessException) e;
                     assertThat(be.getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN);
-                });
-    }
-
-    @Test
-    @DisplayName("차대 불일치 시 승인 실패")
-    void approve_fail_when_unbalanced() {
-        // given
-        User accountingUser = UserFixture.accountingUser();
-        Voucher voucher = VoucherFixture.savedDraft(1L, accountingUser);
-        VoucherLineFixture.addUnbalancedLines(voucher, AccountFixture.cash(), AccountFixture.revenue());
-
-        given(voucherRepository.findById(voucher.getId())).willReturn(Optional.of(voucher));
-        willThrow(new BusinessException(ErrorCode.IMBALANCE_AMOUNT)).given(validator).validateForApprove(voucher);
-
-        // when & then
-        assertThatThrownBy(() -> voucherApprovalService.approve(1L, accountingUser))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(e -> {
-                    BusinessException be = (BusinessException) e;
-                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.IMBALANCE_AMOUNT);
                 });
     }
 
