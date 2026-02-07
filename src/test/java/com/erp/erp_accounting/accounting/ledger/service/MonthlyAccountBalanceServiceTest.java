@@ -20,11 +20,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -85,7 +87,7 @@ class MonthlyAccountBalanceServiceTest {
                 .findByPeriodAndAccountId(MONTH.minusMonths(1), account.getId()))
                 .willReturn(Optional.empty());
         given(voucherLineRepository.findMonthlyTotal(any(), any(), any()))
-                .willReturn(MonthlyBalanceQueryFixture.zero());
+                .willReturn(MonthlyBalanceQueryFixture.of("500", "200"));
         given(balanceCalculationService.calculateClosingBalance(any(), any(), any(), any()))
                 .willReturn(Money.of("1000"));
 
@@ -95,6 +97,8 @@ class MonthlyAccountBalanceServiceTest {
         // then
         assertThat(response.getClosingBalance()).isEqualByComparingTo("1000");
         verify(accountRepository).findById(account.getId());
-        verify(balanceCalculationService).calculateClosingBalance(any(), any(), any(), any());
+        verify(accountingPeriodService).isPreviousPeriodClosed(MONTH);
+        verify(balanceCalculationService).calculateClosingBalance(
+                eq(account.getNormalBalance()), eq(BigDecimal.ZERO), eq(Money.of("500")), eq(Money.of("200")));
     }
 }
