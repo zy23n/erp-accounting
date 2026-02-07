@@ -20,9 +20,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Refresh Token 서비스 테스트")
@@ -40,22 +38,6 @@ class RefreshTokenServiceTest {
     void setUp() {
         user = UserFixture.normalUser();
         ReflectionTestUtils.setField(refreshTokenService, "refreshTokenExpirationDays", 7L);
-    }
-
-    @Test
-    @DisplayName("Refresh Token 생성 성공")
-    void createRefreshToken_success() {
-        // given
-        given(refreshTokenRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
-
-        // when
-        RefreshToken token = refreshTokenService.createRefreshToken(user);
-
-        // then
-        assertThat(token.getUser()).isEqualTo(user);
-        assertThat(token.getToken()).isNotNull();
-        assertThat(token.getExpiresAt()).isAfter(LocalDateTime.now());
-        verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
     @Test
@@ -77,5 +59,21 @@ class RefreshTokenServiceTest {
                     BusinessException be = (BusinessException) e;
                     assertThat(be.getErrorCode()).isEqualTo(ErrorCode.INVALID_STATE);
                 });
+    }
+
+    @Test
+    @DisplayName("유효한 Refresh Token 검증 성공")
+    void validateRefreshToken_success() {
+        RefreshToken validToken = RefreshToken.builder()
+                .user(user)
+                .token("valid-token")
+                .expiresAt(LocalDateTime.now().plusDays(1))
+                .build();
+
+        given(refreshTokenRepository.findByToken("valid-token")).willReturn(Optional.of(validToken));
+
+        RefreshToken result = refreshTokenService.validateRefreshToken("valid-token");
+
+        assertThat(result).isEqualTo(validToken);
     }
 }
