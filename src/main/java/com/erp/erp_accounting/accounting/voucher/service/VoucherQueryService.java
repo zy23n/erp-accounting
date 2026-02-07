@@ -8,7 +8,6 @@ import com.erp.erp_accounting.accounting.voucher.repository.VoucherQueryReposito
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
-import com.erp.erp_accounting.hr.payroll.dto.response.PayrollResponse;
 import com.erp.erp_accounting.user.entity.User;
 import com.erp.erp_accounting.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;

@@ -12,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -21,7 +19,7 @@ public class PayrollConfirmQueryService {
 
     private final PayrollConfirmRepository payrollConfirmRepository;
 
-    // 단건 조회
+    // 상세 조회
     public PayrollConfirmResponse getPayrollConfirm(Long confirmId) {
         PayrollConfirm confirm = payrollConfirmRepository.findDetailById(confirmId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,

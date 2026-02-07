@@ -2,11 +2,13 @@ package com.erp.erp_accounting.accounting.balance.repository;
 
 import com.erp.erp_accounting.accounting.balance.entity.MonthlyAccountBalance;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface MonthlyAccountBalanceRepository extends JpaRepository<MonthlyAccountBalance, Long> {
 
     // 월 전체 스냅샷 조회

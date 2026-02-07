@@ -6,15 +6,12 @@ import com.erp.erp_accounting.accounting.voucher.entity.Voucher;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherService;
 import com.erp.erp_accounting.accounting.voucher.service.command.CreateVoucherCommand;
 import com.erp.erp_accounting.security.annotation.CurrentUser;
-import com.erp.erp_accounting.security.principal.UserPrincipal;
 import com.erp.erp_accounting.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
