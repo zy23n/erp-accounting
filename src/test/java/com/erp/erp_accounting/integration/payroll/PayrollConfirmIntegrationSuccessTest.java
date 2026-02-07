@@ -27,7 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.YearMonth;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -81,16 +82,18 @@ class PayrollConfirmIntegrationSuccessTest {
         // then - 급여 확정 상태
         PayrollConfirm confirm = payrollConfirmRepository.findById(confirmId).orElseThrow();
 
-        assertEquals(PayrollConfirmStatus.CONFIRMED, confirm.getStatus());
-        assertEquals(hrUser.getId(), confirm.getConfirmedBy().getId());
-        assertNotNull(confirm.getConfirmedAt());
+        assertThat(confirm.getStatus()).isEqualTo(PayrollConfirmStatus.CONFIRMED);
+        assertThat(confirm.getConfirmedBy().getId()).isEqualTo(hrUser.getId());
+        assertThat(confirm.getConfirmedAt()).isNotNull();
 
         // then - 자동 전표 생성
         List<Voucher> vouchers = voucherRepository.findBySourceTypeAndSourceId(SourceType.PAYROLL, confirmId);
 
-        assertEquals(1, vouchers.size());
-        assertEquals(SourceType.PAYROLL, vouchers.get(0).getSourceType());
-        assertTrue(vouchers.stream().allMatch(v -> v.getStatus() == VoucherStatus.APPROVED));
+        assertThat(vouchers).hasSize(1);
+        assertThat(vouchers).allSatisfy(v -> {
+            assertThat(v.getSourceType()).isEqualTo(SourceType.PAYROLL);
+            assertThat(v.getStatus()).isEqualTo(VoucherStatus.APPROVED);
+        });
     }
 
     @Test
@@ -102,8 +105,8 @@ class PayrollConfirmIntegrationSuccessTest {
 
         List<Voucher> vouchers = voucherRepository.findBySourceTypeAndSourceId(SourceType.PAYROLL, confirmId);
 
-        assertEquals(1, vouchers.size());
-        assertEquals(VoucherStatus.APPROVED, vouchers.get(0).getStatus());
+        assertThat(vouchers).hasSize(1);
+        assertThat(vouchers.get(0).getStatus()).isEqualTo(VoucherStatus.APPROVED);
 
         // when - 급여 확정 취소
         payrollConfirmService.cancel(confirmId, hrUser);
@@ -111,14 +114,14 @@ class PayrollConfirmIntegrationSuccessTest {
         // then - 급여 확정 상태
         PayrollConfirm confirm = payrollConfirmRepository.findById(confirmId).orElseThrow();
 
-        assertEquals(PayrollConfirmStatus.CANCELED, confirm.getStatus());
-        assertNotNull(confirm.getCanceledAt());
-        assertEquals(hrUser.getId(), confirm.getCanceledBy().getId());
+        assertThat(confirm.getStatus()).isEqualTo(PayrollConfirmStatus.CANCELED);
+        assertThat(confirm.getCanceledBy().getId()).isEqualTo(hrUser.getId());
+        assertThat(confirm.getCanceledAt()).isNotNull();
 
         // then - 자동 전표 취소
         Voucher canceledVoucher = voucherRepository.findBySourceTypeAndSourceId(SourceType.PAYROLL, confirmId).get(0);
 
-        assertEquals(VoucherStatus.CANCELED, canceledVoucher.getStatus());
+        assertThat(canceledVoucher.getStatus()).isEqualTo(VoucherStatus.CANCELED);
     }
 
     @Test
@@ -132,15 +135,17 @@ class PayrollConfirmIntegrationSuccessTest {
         accountingPeriodService.close(PERIOD, adminUser);
 
         // when & then
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                payrollConfirmService.confirm(confirmId, hrUser));
-
-        assertEquals(ErrorCode.PERIOD_ALREADY_CLOSED, ex.getErrorCode());
+        assertThatThrownBy(() -> payrollConfirmService.confirm(confirmId, hrUser))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> {
+                    BusinessException be = (BusinessException) e;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.PERIOD_ALREADY_CLOSED);
+                });
 
         // 급여 확정 상태 유지
         PayrollConfirm confirm = payrollConfirmRepository.findById(confirmId).orElseThrow();
 
-        assertEquals(PayrollConfirmStatus.CREATED, confirm.getStatus());
-        assertNull(confirm.getConfirmedAt());
+        assertThat(confirm.getStatus()).isEqualTo(PayrollConfirmStatus.CREATED);
+        assertThat(confirm.getConfirmedAt()).isNull();
     }
 }

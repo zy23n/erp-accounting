@@ -22,7 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -64,9 +65,9 @@ class VoucherIntegrationTest {
         Voucher voucher = voucherService.createVoucher(command, normalUser);
 
         // then
-        assertNotNull(voucher.getId());
-        assertEquals(2, voucher.getLines().size());
-        assertEquals(VoucherStatus.DRAFT, voucher.getStatus());
+        assertThat(voucher.getId()).isNotNull();
+        assertThat(voucher.getLines()).hasSize(2);
+        assertThat(voucher.getStatus()).isEqualTo(VoucherStatus.DRAFT);
     }
 
     @Test
@@ -76,12 +77,16 @@ class VoucherIntegrationTest {
         CreateVoucherCommand command = VoucherCommandFixture.imbalance(cash.getId(), revenue.getId());
 
         // when & then
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                voucherService.createVoucher(command, normalUser));
-
-        assertEquals(ErrorCode.IMBALANCE_AMOUNT, ex.getErrorCode());
-        assertTrue(ex.hasDetail());
-        assertEquals("요청 전표 대차 불일치 (차변 합계=1000, 대변 합계=500)", ex.getDetailMessage());
+        assertThatThrownBy(() -> voucherService.createVoucher(command, normalUser))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> {
+                    BusinessException be = (BusinessException) ex;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.IMBALANCE_AMOUNT);
+                    assertThat(be.hasDetail()).isTrue();
+                    assertThat(be.getDetailMessage()).isEqualTo(
+                            "요청 전표 대차 불일치 (차변 합계=1000, 대변 합계=500)"
+                    );
+                });
     }
 
     @Test
@@ -92,10 +97,12 @@ class VoucherIntegrationTest {
         CreateVoucherCommand command = VoucherCommandFixture.valid(cash.getId(), revenue.getId());
 
         // when & then
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> voucherService.createVoucher(command, normalUser));
-
-        assertEquals(ErrorCode.PERIOD_ALREADY_CLOSED, ex.getErrorCode());
-        assertTrue(ex.getDetailMessage().contains("이미 마감된 회계기간"));
+        assertThatThrownBy(() -> voucherService.createVoucher(command, normalUser))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> {
+                    BusinessException be = (BusinessException) ex;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.PERIOD_ALREADY_CLOSED);
+                    assertThat(be.getDetailMessage()).contains("이미 마감된 회계기간");
+                });
     }
 }

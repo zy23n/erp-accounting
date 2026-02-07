@@ -31,8 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -81,7 +81,7 @@ class PayrollConfirmIntegrationFailTest {
         PayrollConfirm confirm = payrollConfirmRepository.findById(confirmId).orElseThrow();
 
         // 롤백 검증
-        assertEquals(PayrollConfirmStatus.CREATED, confirm.getStatus());
+        assertThat(confirm.getStatus()).isEqualTo(PayrollConfirmStatus.CREATED);
     }
 
     @TestConfiguration

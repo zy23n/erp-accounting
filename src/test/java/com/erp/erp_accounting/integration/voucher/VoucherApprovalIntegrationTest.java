@@ -25,7 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -71,9 +72,9 @@ class VoucherApprovalIntegrationTest {
         VoucherApprovalResponse approved = voucherApprovalService.approve(voucher.getId(), accountingUser);
 
         // then
-        assertEquals(VoucherStatus.APPROVED, approved.getStatus());
-        assertEquals(accountingUser.getId(), approved.getProcessedById());
-        assertNotNull(approved.getProcessedAt());
+        assertThat(approved.getStatus()).isEqualTo(VoucherStatus.APPROVED);
+        assertThat(approved.getProcessedById()).isEqualTo(accountingUser.getId());
+        assertThat(approved.getProcessedAt()).isNotNull();
     }
 
     @Test
@@ -86,11 +87,10 @@ class VoucherApprovalIntegrationTest {
         Voucher voucher = voucherService.createVoucher(command, accountingUser);
 
         // when & then
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                voucherApprovalService.approve(voucher.getId(), normalUser)
-        );
-
-        assertEquals(ErrorCode.FORBIDDEN, ex.getErrorCode());
+        assertThatThrownBy(() -> voucherApprovalService.approve(voucher.getId(), normalUser))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.FORBIDDEN);
     }
 
     @Test
@@ -103,9 +103,9 @@ class VoucherApprovalIntegrationTest {
         accountingPeriodService.close(PERIOD, accountingUser);
 
         // when & then
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                voucherApprovalService.approve(voucher.getId(), accountingUser));
-
-        assertEquals(ErrorCode.PERIOD_ALREADY_CLOSED, ex.getErrorCode());
+        assertThatThrownBy(() -> voucherApprovalService.approve(voucher.getId(), accountingUser))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PERIOD_ALREADY_CLOSED);
     }
 }

@@ -30,7 +30,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -87,11 +87,10 @@ public class AccountingPeriodCloseIntegrationTest {
         // then
         AccountingPeriod period = accountingPeriodRepository.findByPeriod(PERIOD).orElseThrow();
 
-        assertTrue(period.isClosed());
-        assertEquals(adminUser.getId(), period.getClosedBy().getId());
+        assertThat(period.isClosed()).isTrue();
+        assertThat(period.getClosedBy().getId()).isEqualTo(adminUser.getId());
 
         List<MonthlyAccountBalance> balances = monthlyAccountBalanceRepository.findByPeriod(PERIOD);
-
         MonthlyAccountBalance cashBalance = balances.stream()
                 .filter(b -> b.getAccount().getId().equals(cash.getId()))
                 .findFirst()
@@ -106,11 +105,11 @@ public class AccountingPeriodCloseIntegrationTest {
         // given
         closeService.reopenPeriod(PREV, adminUser);
 
-        // when
-        BusinessException ex = assertThrows(BusinessException.class, () -> closeService.closePeriod(PERIOD, adminUser));
-
-        // then
-        assertEquals(ErrorCode.PERIOD_NOT_CLOSED, ex.getErrorCode());
+        // when & then
+        assertThatThrownBy(() -> closeService.closePeriod(PERIOD, adminUser))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PERIOD_NOT_CLOSED);
     }
 
     @Test
@@ -126,14 +125,15 @@ public class AccountingPeriodCloseIntegrationTest {
         voucherRepository.save(v2);
 
         // when
-        assertThrows(BusinessException.class, () -> closeService.closePeriod(PERIOD, adminUser));
+        assertThatThrownBy(() -> closeService.closePeriod(PERIOD, adminUser))
+                .isInstanceOf(BusinessException.class);
 
         // then
         AccountingPeriod period = accountingPeriodRepository.findByPeriod(PERIOD).orElseThrow();
 
-        assertFalse(period.isClosed());
-        assertNull(period.getClosedBy());
-        assertTrue(monthlyAccountBalanceRepository.findByPeriod(PERIOD).isEmpty());
+        assertThat(period.isClosed()).isFalse();
+        assertThat(period.getClosedBy()).isNull();
+        assertThat(monthlyAccountBalanceRepository.findByPeriod(PERIOD)).isEmpty();
     }
 
     @Test
@@ -143,7 +143,8 @@ public class AccountingPeriodCloseIntegrationTest {
         closeService.closePeriod(PERIOD, adminUser);
 
         // when & then
-        assertThrows(BusinessException.class, () -> closeService.closePeriod(PERIOD, adminUser));
+        assertThatThrownBy(() -> closeService.closePeriod(PERIOD, adminUser))
+                .isInstanceOf(BusinessException.class);
     }
 
     @Test
@@ -158,7 +159,7 @@ public class AccountingPeriodCloseIntegrationTest {
         // then
         AccountingPeriod period = accountingPeriodRepository.findByPeriod(PERIOD).orElseThrow();
 
-        assertFalse(period.isClosed());
-        assertTrue(monthlyAccountBalanceRepository.findByPeriod(PERIOD).isEmpty());
+        assertThat(period.isClosed()).isFalse();
+        assertThat(monthlyAccountBalanceRepository.findByPeriod(PERIOD)).isEmpty();
     }
 }
