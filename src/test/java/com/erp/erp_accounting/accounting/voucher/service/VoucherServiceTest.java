@@ -50,20 +50,24 @@ class VoucherServiceTest {
     private VoucherValidator validator;
 
     private User user;
+    private Long debitAccountId;
+    private Long creditAccountId;
 
     @BeforeEach
     void setUp() {
         user = UserFixture.normalUser();
+        debitAccountId = 1L;
+        creditAccountId = 2L;
     }
 
     @Test
     @DisplayName("전표 생성 성공")
     void createVoucher_success() {
         // given
-        CreateVoucherCommand command = VoucherCommandFixture.valid();
+        CreateVoucherCommand command = VoucherCommandFixture.valid(debitAccountId, creditAccountId);
 
-        given(accountRepository.findById(1L)).willReturn(Optional.of(AccountFixture.cash()));
-        given(accountRepository.findById(2L)).willReturn(Optional.of(AccountFixture.revenue()));
+        given(accountRepository.findById(debitAccountId)).willReturn(Optional.of(AccountFixture.cash()));
+        given(accountRepository.findById(creditAccountId)).willReturn(Optional.of(AccountFixture.revenue()));
 
         // when
         Voucher voucher = voucherService.createVoucher(command, user);
@@ -78,7 +82,7 @@ class VoucherServiceTest {
     @DisplayName("대차 불일치 시 전표 생성 실패")
     void createVoucher_fail_when_debit_credit_unbalanced() {
         // given
-        CreateVoucherCommand command = VoucherCommandFixture.valid();
+        CreateVoucherCommand command = VoucherCommandFixture.valid(debitAccountId, creditAccountId);
 
         willThrow(new BusinessException(ErrorCode.IMBALANCE_AMOUNT, "요청 전표 대차 불일치 (차변 합계=1000, 대변 합계=900)"))
                 .given(validator).validateForCreate(any());
@@ -98,7 +102,7 @@ class VoucherServiceTest {
     @DisplayName("회계기간 마감 시 전표 생성 불가")
     void createVoucher_fail_when_period_closed() {
         // given
-        CreateVoucherCommand command = VoucherCommandFixture.valid();
+        CreateVoucherCommand command = VoucherCommandFixture.valid(debitAccountId, creditAccountId);
 
         willThrow(new BusinessException(ErrorCode.PERIOD_ALREADY_CLOSED, "회계기간 마감"))
                 .given(accountingPeriodService).assertPeriodOpen(any());
@@ -117,7 +121,7 @@ class VoucherServiceTest {
     @DisplayName("validator가 예외를 던지면 그대로 전파")
     void createVoucher_fail_when_validator_throws() {
         // given
-        CreateVoucherCommand command = VoucherCommandFixture.valid();
+        CreateVoucherCommand command = VoucherCommandFixture.valid(debitAccountId, creditAccountId);
 
         willThrow(new BusinessException(ErrorCode.INVALID_REQUEST, "전표 라인 오류"))
                 .given(validator).validateForCreate(any());

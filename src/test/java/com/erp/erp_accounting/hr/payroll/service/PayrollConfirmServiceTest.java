@@ -61,8 +61,8 @@ class PayrollConfirmServiceTest {
         confirmer = UserFixture.hrUser();
         ReflectionTestUtils.setField(confirmer, "id", 10L);
 
-        Employee employee = EmployeeFixture.employee(1L);
-        payroll = PayrollFixture.savedCalculatedPayroll(10L, employee);
+        Employee employee = EmployeeFixture.employee();
+        payroll = PayrollFixture.calculatedPayroll(employee);
     }
 
     @Test

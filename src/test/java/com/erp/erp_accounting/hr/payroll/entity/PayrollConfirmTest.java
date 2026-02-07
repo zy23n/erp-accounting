@@ -30,7 +30,7 @@ class PayrollConfirmTest {
         confirmer = UserFixture.accountingUser();
         ReflectionTestUtils.setField(confirmer, "id", 10L);
 
-        Employee employee = EmployeeFixture.employee(1L);
+        Employee employee = EmployeeFixture.employee();
         payroll = PayrollFixture.calculatedPayroll(employee);
 
         confirm = PayrollConfirmFixture.created(YearMonth.of(2026, 1));
@@ -51,7 +51,7 @@ class PayrollConfirmTest {
     @DisplayName("급여 월이 다르면 예외")
     void addPayroll_fail_when_payMonth_mismatch() {
         // given
-        Payroll otherMonthPayroll = PayrollFixture.calculatedPayroll(EmployeeFixture.employee(2L));
+        Payroll otherMonthPayroll = PayrollFixture.calculatedPayroll(EmployeeFixture.employee());
         ReflectionTestUtils.setField(otherMonthPayroll, "payMonth", YearMonth.of(2026, 2));
 
         // when & then

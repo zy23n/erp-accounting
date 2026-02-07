@@ -16,7 +16,7 @@ class PayrollTest {
 
     @BeforeEach
     void setUp() {
-        employee = EmployeeFixture.employee(1L);
+        employee = EmployeeFixture.employee();
     }
 
     @Test

@@ -40,7 +40,7 @@ class PayrollServiceTest {
 
     @BeforeEach
     void setUp() {
-        employee = EmployeeFixture.employee(1L);
+        employee = EmployeeFixture.employeeWithId(1L);
     }
 
     @Test

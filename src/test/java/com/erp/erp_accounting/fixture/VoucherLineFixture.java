@@ -9,39 +9,29 @@ import java.math.BigDecimal;
 
 public class VoucherLineFixture {
 
-    public static void addBalancedLines(Voucher voucher) {
-        voucher.addLine(debitLine(AccountFixture.cash(), 1_000));
-        voucher.addLine(creditLine(AccountFixture.revenue(), 1_000));
-    }
-
-    public static void addUnbalancedLines(Voucher voucher) {
-        voucher.addLine(debitLine(AccountFixture.cash(), 1_000));
-        voucher.addLine(creditLine(AccountFixture.revenue(), 500));
-    }
-
     public static void addBalancedLines(Voucher voucher, Account debitAccount, Account creditAccount) {
-        voucher.addLine(debitLine(debitAccount, 1_000));
-        voucher.addLine(creditLine(creditAccount, 1_000));
+        voucher.addLine(debitLine(debitAccount, BigDecimal.valueOf(1_000)));
+        voucher.addLine(creditLine(creditAccount, BigDecimal.valueOf(1_000)));
     }
 
     public static void addUnbalancedLines(Voucher voucher, Account debitAccount, Account creditAccount) {
-        voucher.addLine(debitLine(debitAccount, 1_000));
-        voucher.addLine(creditLine(creditAccount, 500));
+        voucher.addLine(debitLine(debitAccount, BigDecimal.valueOf(1_000)));
+        voucher.addLine(creditLine(creditAccount, BigDecimal.valueOf(500)));
     }
 
-    private static VoucherLine debitLine(Account account, int amount) {
+    private static VoucherLine debitLine(Account account, BigDecimal amount) {
         return VoucherLine.builder()
                 .account(account)
                 .type(LineType.DEBIT)
-                .amount(BigDecimal.valueOf(amount))
+                .amount(amount)
                 .build();
     }
 
-    private static VoucherLine creditLine(Account account, int amount) {
+    private static VoucherLine creditLine(Account account, BigDecimal amount) {
         return VoucherLine.builder()
                 .account(account)
                 .type(LineType.CREDIT)
-                .amount(BigDecimal.valueOf(amount))
+                .amount(amount)
                 .build();
     }
 

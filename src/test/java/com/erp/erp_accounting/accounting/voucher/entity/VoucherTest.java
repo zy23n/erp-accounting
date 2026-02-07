@@ -1,7 +1,9 @@
 package com.erp.erp_accounting.accounting.voucher.entity;
 
+import com.erp.erp_accounting.accounting.account.entity.Account;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
+import com.erp.erp_accounting.fixture.AccountFixture;
 import com.erp.erp_accounting.fixture.UserFixture;
 import com.erp.erp_accounting.fixture.VoucherFixture;
 import com.erp.erp_accounting.fixture.VoucherLineFixture;
@@ -17,18 +19,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class VoucherTest {
 
     private User user;
+    private Account cash;
+    private Account revenue;
 
     @BeforeEach
     void setUp() {
         user = UserFixture.normalUser();
+        cash = AccountFixture.cash();
+        revenue = AccountFixture.revenue();
     }
 
     @Test
     @DisplayName("대차 일치 시 전표 승인 성공")
     void approve_success_when_balanced() {
         // given
-        Voucher voucher = VoucherFixture.savedDraft(1L, user);
-        VoucherLineFixture.addBalancedLines(voucher);
+        Voucher voucher = VoucherFixture.draft(user);
+        VoucherLineFixture.addBalancedLines(voucher, cash, revenue);
 
         // when
         voucher.approve(user);
@@ -43,8 +49,8 @@ class VoucherTest {
     @DisplayName("대차 불일치 시 전표 승인 실패")
     void approve_fail_when_unbalanced() {
         // given
-        Voucher voucher = VoucherFixture.savedDraft(1L, user);
-        VoucherLineFixture.addUnbalancedLines(voucher);
+        Voucher voucher = VoucherFixture.draft(user);
+        VoucherLineFixture.addUnbalancedLines(voucher, cash, revenue);
 
         // when & then
         assertThatThrownBy(() -> voucher.approve(user))

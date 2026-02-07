@@ -28,7 +28,6 @@ public class VoucherFixture {
 
     public static Voucher savedDraft(Long id,  User user) {
         Voucher voucher = draft(user);
-
         ReflectionTestUtils.setField(voucher, "id", id);
         return voucher;
     }

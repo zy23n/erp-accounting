@@ -59,7 +59,7 @@ class PayrollQueryServiceTest {
         normalUser = UserFixture.normalUser();
         ReflectionTestUtils.setField(normalUser, "id", 2L);
 
-        Employee employee = EmployeeFixture.employee(2L);
+        Employee employee = EmployeeFixture.employeeWithId(2L);
         payroll = PayrollFixture.savedCalculatedPayroll(100L, employee);
     }
 

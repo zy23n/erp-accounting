@@ -13,10 +13,6 @@ public class VoucherCommandFixture {
 
     private static final LocalDate FIXED_DATE = LocalDate.of(2026, 1, 1);
 
-    public static CreateVoucherCommand valid() {
-        return valid(1L, 2L);
-    }
-
     public static CreateVoucherCommand valid(Long debitAccountId, Long creditAccountId) {
         return new CreateVoucherCommand(
                 FIXED_DATE,
@@ -39,14 +35,14 @@ public class VoucherCommandFixture {
 
     private static List<VoucherLineRequest> balancedLines(Long debitAccountId, Long creditAccountId) {
         return List.of(
-                new VoucherLineRequest(debitAccountId, LineType.DEBIT, BigDecimal.valueOf(1000)),
-                new VoucherLineRequest(creditAccountId, LineType.CREDIT, BigDecimal.valueOf(1000))
+                new VoucherLineRequest(debitAccountId, LineType.DEBIT, BigDecimal.valueOf(1_000)),
+                new VoucherLineRequest(creditAccountId, LineType.CREDIT, BigDecimal.valueOf(1_000))
         );
     }
 
     private static List<VoucherLineRequest> unbalancedLines(Long debitAccountId, Long creditAccountId) {
         return List.of(
-                new VoucherLineRequest(debitAccountId, LineType.DEBIT, BigDecimal.valueOf(1000)),
+                new VoucherLineRequest(debitAccountId, LineType.DEBIT, BigDecimal.valueOf(1_000)),
                 new VoucherLineRequest(creditAccountId, LineType.CREDIT, BigDecimal.valueOf(500))
         );
     }

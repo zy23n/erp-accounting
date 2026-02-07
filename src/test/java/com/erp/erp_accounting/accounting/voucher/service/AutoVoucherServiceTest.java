@@ -57,7 +57,7 @@ class AutoVoucherServiceTest {
         confirmer = UserFixture.accountingUser();
         ReflectionTestUtils.setField(confirmer, "id", 20L);
 
-        Employee employee = EmployeeFixture.employee(1L);
+        Employee employee = EmployeeFixture.employee();
         Payroll payroll = PayrollFixture.calculatedPayroll(employee);
 
         confirm = PayrollConfirmFixture.saved(1L, YearMonth.of(2026, 1));

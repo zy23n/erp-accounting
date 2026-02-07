@@ -6,6 +6,7 @@ import com.erp.erp_accounting.accounting.voucher.entity.*;
 import com.erp.erp_accounting.accounting.voucher.repository.VoucherRepository;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
+import com.erp.erp_accounting.fixture.AccountFixture;
 import com.erp.erp_accounting.fixture.UserFixture;
 import com.erp.erp_accounting.fixture.VoucherFixture;
 import com.erp.erp_accounting.fixture.VoucherLineFixture;
@@ -22,7 +23,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doThrow;
@@ -49,7 +49,7 @@ class VoucherApprovalServiceTest {
         // given
         User accountingUser = UserFixture.accountingUser();
         Voucher voucher = VoucherFixture.savedDraft(1L, accountingUser);
-        VoucherLineFixture.addBalancedLines(voucher);
+        VoucherLineFixture.addBalancedLines(voucher, AccountFixture.cash(), AccountFixture.revenue());
 
         given(voucherRepository.findById(voucher.getId())).willReturn(Optional.of(voucher));
 
@@ -85,6 +85,7 @@ class VoucherApprovalServiceTest {
         // given
         User accountingUser = UserFixture.accountingUser();
         Voucher voucher = VoucherFixture.savedDraft(1L, accountingUser);
+        VoucherLineFixture.addUnbalancedLines(voucher, AccountFixture.cash(), AccountFixture.revenue());
 
         given(voucherRepository.findById(voucher.getId())).willReturn(Optional.of(voucher));
         willThrow(new BusinessException(ErrorCode.IMBALANCE_AMOUNT)).given(validator).validateForApprove(voucher);
@@ -102,12 +103,13 @@ class VoucherApprovalServiceTest {
     @DisplayName("회계기간 마감 시 전표 승인 불가")
     void approveVoucher_fail_when_period_closed() {
         // given
+        YearMonth period = YearMonth.of(2026, 1);
         User accountingUser = UserFixture.accountingUser();
         Voucher voucher = VoucherFixture.savedDraft(1L, accountingUser);
 
         given(voucherRepository.findById(voucher.getId())).willReturn(Optional.of(voucher));
         doThrow(new BusinessException(ErrorCode.PERIOD_ALREADY_CLOSED, "회계기간 마감"))
-                .when(accountingPeriodService).assertPeriodOpen(any(YearMonth.class));
+                .when(accountingPeriodService).assertPeriodOpen(period);
 
         // when & then
         assertThatThrownBy(() -> voucherApprovalService.approve(voucher.getId(), accountingUser))
