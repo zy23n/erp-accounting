@@ -48,6 +48,17 @@ class PayrollConfirmTest {
     }
 
     @Test
+    @DisplayName("이미 급여 확정에 포함된 급여는 추가 불가")
+    void addPayroll_fail_when_already_confirmed() {
+        // when
+        confirm.addPayroll(payroll);
+
+        // then
+        assertThatThrownBy(() -> confirm.addPayroll(payroll))
+                .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
     @DisplayName("급여 월이 다르면 예외")
     void addPayroll_fail_when_payMonth_mismatch() {
         // given
@@ -56,21 +67,6 @@ class PayrollConfirmTest {
 
         // when & then
         assertThatThrownBy(() -> confirm.addPayroll(otherMonthPayroll))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(e -> {
-                    BusinessException be = (BusinessException) e;
-                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.INVALID_STATE);
-                });
-    }
-
-    @Test
-    @DisplayName("CALCULATED 상태가 아니면 예외")
-    void addPayroll_fail_when_status_invalid() {
-        // given
-        payroll.markConfirmed();
-
-        // when & then
-        assertThatThrownBy(() -> confirm.addPayroll(payroll))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> {
                     BusinessException be = (BusinessException) e;
