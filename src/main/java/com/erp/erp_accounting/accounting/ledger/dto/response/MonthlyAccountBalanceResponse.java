@@ -85,4 +85,20 @@ public class MonthlyAccountBalanceResponse {
                 closing
         );
     }
+
+    public static MonthlyAccountBalanceResponse empty(
+            Long accountId,
+            YearMonth month,
+            BalanceSource source
+    ) {
+        return of(
+                accountId,
+                month,
+                source,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO
+        );
+    }
 }

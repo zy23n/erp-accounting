@@ -38,8 +38,6 @@ public class MonthlyBalanceCalculationService {
             BigDecimal debit = debitSums.getOrDefault(accountId, BigDecimal.ZERO);
             BigDecimal credit = creditSums.getOrDefault(accountId, BigDecimal.ZERO);
 
-            if (isZero(opening) && isZero(debit) && isZero(credit)) continue;
-
             BigDecimal closing = BalanceCalculator.applyNormalBalance(account.getNormalBalance(), opening, debit, credit);
 
             result.add(

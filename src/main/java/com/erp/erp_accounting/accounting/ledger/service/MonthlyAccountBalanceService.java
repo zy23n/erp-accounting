@@ -9,6 +9,7 @@ import com.erp.erp_accounting.accounting.balance.service.MonthlyBalanceCalculati
 import com.erp.erp_accounting.accounting.ledger.dto.query.MonthlyBalanceQueryDto;
 import com.erp.erp_accounting.accounting.ledger.dto.query.OpeningBalanceDto;
 import com.erp.erp_accounting.accounting.ledger.dto.response.MonthlyAccountBalanceResponse;
+import com.erp.erp_accounting.accounting.ledger.entity.BalanceSource;
 import com.erp.erp_accounting.accounting.ledger.repository.VoucherLineRepository;
 import com.erp.erp_accounting.accounting.ledger.service.command.MonthlyAccountBalanceCommand;
 import com.erp.erp_accounting.accounting.period.service.AccountingPeriodService;
@@ -51,14 +52,16 @@ public class MonthlyAccountBalanceService {
 
     // 마감 월: 스냅샷
     private MonthlyAccountBalanceResponse getFromSnapshot(MonthlyAccountBalanceCommand command) {
-        MonthlyAccountBalance balance =
-                monthlyAccountBalanceRepository
-                        .findByPeriodAndAccountId(command.getMonth(), command.getAccountId())
-                        .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
-                                String.format("월별 잔액 스냅샷 미존재 (period=%s, accountId=%d)",
-                                        command.getMonth(), command.getAccountId())));
-
-        return MonthlyAccountBalanceResponse.fromSnapshot(balance);
+        return monthlyAccountBalanceRepository
+                .findByPeriodAndAccountId(command.getMonth(), command.getAccountId())
+                .map(MonthlyAccountBalanceResponse::fromSnapshot)
+                .orElse(
+                        MonthlyAccountBalanceResponse.empty(
+                                command.getAccountId(),
+                                command.getMonth(),
+                                BalanceSource.SNAPSHOT
+                        )
+                );
     }
 
     // 미마감 월: 실시간 계산
