@@ -35,7 +35,7 @@ public class AccountingPeriodService {
     }
 
     // 마감 여부 확인
-    @Cacheable(value = "accountingPeriod:closed", key = "#period")
+    @Cacheable(value = "accountingPeriod:closed", key = "#p0")
     public boolean isPeriodClosed(YearMonth period) {
         return accountingPeriodRepository.findByPeriod(period)
                 .map(AccountingPeriod::isClosed)

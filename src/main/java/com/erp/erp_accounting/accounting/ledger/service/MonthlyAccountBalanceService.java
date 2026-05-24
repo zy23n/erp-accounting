@@ -86,7 +86,7 @@ public class MonthlyAccountBalanceService {
         log.debug("[MONTHLY_BALANCE] action=CALC_REALTIME, accountId={}, month={}, opening={}, debit={}, credit={}, closing={}",
                 command.getAccountId(), command.getMonth(), openingBalance, debit, credit, closingBalance);
 
-        return MonthlyAccountBalanceResponse.fromRealtime(openingBalance, debit, credit, closingBalance);
+        return MonthlyAccountBalanceResponse.fromRealtime(command, openingBalance, debit, credit, closingBalance);
     }
 
     // 전기이월 계산 정책: 이전 월 마감 시 스냅샷, 미마감 시 실시간 누적
