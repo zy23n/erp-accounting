@@ -1,5 +1,6 @@
 package com.erp.erp_accounting.hr.payroll.controller;
 
+import com.erp.erp_accounting.hr.payroll.dto.response.PayrollConfirmResponse;
 import com.erp.erp_accounting.hr.payroll.service.PayrollConfirmService;
 import com.erp.erp_accounting.security.annotation.CurrentUser;
 import com.erp.erp_accounting.user.entity.User;
@@ -34,22 +35,22 @@ public class PayrollConfirmController {
     @Operation(summary = "급여 확정 처리", description = "급여 확정 건을 확정 상태로 처리합니다.")
     @PostMapping("/{payrollConfirmId}/confirm")
     @PreAuthorize("hasRole('HR')")
-    public ResponseEntity<Void> confirm(
+    public ResponseEntity<PayrollConfirmResponse> confirm(
             @Parameter(description = "급여 확정 ID", required = true, example = "1")
             @PathVariable("payrollConfirmId") Long payrollConfirmId, @CurrentUser User user
     ) {
-        payrollConfirmService.confirm(payrollConfirmId, user);
-        return ResponseEntity.ok().build();
+        PayrollConfirmResponse response = payrollConfirmService.confirm(payrollConfirmId, user);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "급여 확정 취소", description = "급여 확정 상태를 취소 처리합니다.")
     @PostMapping("/{payrollConfirmId}/cancel")
     @PreAuthorize("hasRole('HR')")
-    public ResponseEntity<Void> cancel(
+    public ResponseEntity<PayrollConfirmResponse> cancel(
             @Parameter(description = "급여 확정 ID", required = true, example = "1")
             @PathVariable("payrollConfirmId") Long payrollConfirmId, @CurrentUser User user
     ) {
-        payrollConfirmService.cancel(payrollConfirmId, user);
-        return ResponseEntity.ok().build();
+        PayrollConfirmResponse response = payrollConfirmService.cancel(payrollConfirmId, user);
+        return ResponseEntity.ok(response);
     }
 }

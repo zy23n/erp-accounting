@@ -6,6 +6,7 @@ import com.erp.erp_accounting.accounting.voucher.service.AutoVoucherService;
 import com.erp.erp_accounting.accounting.voucher.service.VoucherService;
 import com.erp.erp_accounting.common.exception.BusinessException;
 import com.erp.erp_accounting.common.exception.ErrorCode;
+import com.erp.erp_accounting.hr.payroll.dto.response.PayrollConfirmResponse;
 import com.erp.erp_accounting.hr.payroll.entity.Payroll;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollStatus;
@@ -55,7 +56,7 @@ public class PayrollConfirmService {
     }
 
     // 급여 확정 처리 (최초 확정 + 재확정 공용)
-    public void confirm(Long confirmId, User confirmer) {
+    public PayrollConfirmResponse confirm(Long confirmId, User confirmer) {
 
         log.info("[PAYROLL_CONFIRM] action=PROCESS_REQUEST, payrollConfirmId={}, confirmerId={}",
                 confirmId, confirmer.getId());
@@ -82,10 +83,12 @@ public class PayrollConfirmService {
 
         log.info("[PAYROLL_CONFIRM] action=PROCESS_COMPLETE, payrollConfirmId={}, confirmerId={}, payMonth={}",
                 confirmId, confirmer.getId(), confirm.getPayMonth());
+
+        return PayrollConfirmResponse.fromStatusChange(confirm);
     }
 
     // 급여 확정 취소
-    public void cancel(Long confirmId, User canceler) {
+    public PayrollConfirmResponse cancel(Long confirmId, User canceler) {
 
         log.info("[PAYROLL_CONFIRM] action=CANCEL_REQUEST, payrollConfirmId={}, cancelerId={}",
                 confirmId, canceler.getId());
@@ -102,6 +105,8 @@ public class PayrollConfirmService {
 
         log.info("[PAYROLL_CONFIRM] action=CANCEL_COMPLETE, payrollConfirmId={}, cancelerId={}, payMonth={}",
                 confirmId, canceler.getId(), confirm.getPayMonth());
+
+        return PayrollConfirmResponse.fromStatusChange(confirm);
     }
 
     private PayrollConfirm findConfirm(Long confirmId) {

@@ -2,6 +2,7 @@ package com.erp.erp_accounting.hr.payroll.dto.response;
 
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirm;
 import com.erp.erp_accounting.hr.payroll.entity.PayrollConfirmStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.util.List;
 import static com.erp.erp_accounting.common.util.DtoUtils.getUserId;
 import static com.erp.erp_accounting.common.util.DtoUtils.getUsername;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Builder
 @AllArgsConstructor
@@ -66,6 +68,20 @@ public class PayrollConfirmResponse {
                 .canceledByUsername(getUsername(confirm.getCanceledBy()))
                 .canceledAt(confirm.getCanceledAt())
                 .payrolls(payrolls)
+                .build();
+    }
+
+    public static PayrollConfirmResponse fromStatusChange(PayrollConfirm confirm) {
+        return PayrollConfirmResponse.builder()
+                .id(confirm.getId())
+                .payMonth(confirm.getPayMonth())
+                .status(confirm.getStatus())
+                .confirmedById(getUserId(confirm.getConfirmedBy()))
+                .confirmedByUsername(getUsername(confirm.getConfirmedBy()))
+                .confirmedAt(confirm.getConfirmedAt())
+                .canceledById(getUserId(confirm.getCanceledBy()))
+                .canceledByUsername(getUsername(confirm.getCanceledBy()))
+                .canceledAt(confirm.getCanceledAt())
                 .build();
     }
 }
